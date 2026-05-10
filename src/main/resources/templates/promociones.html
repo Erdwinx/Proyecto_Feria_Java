@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feria - Promociones</title>
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<header class="topbar">
+    <div class="brand">FeriaPass</div>
+    <nav class="topnav">
+        <a href="/inicio">Inicio</a>
+        <a href="/eventos">Eventos</a>
+        <a href="/noticias">Noticias</a>
+        <a href="/promociones">Promociones</a>
+        <a href="/comprar">Comprar</a>
+    </nav>
+    <div class="profile-wrap" id="profileWrap">
+        <button id="profileButton" class="profile-button" type="button" aria-expanded="false" aria-controls="profileDrawer">
+            <span class="profile-avatar">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2c-4.4 0-8 2.2-8 5v1h16v-1c0-2.8-3.6-5-8-5Z"></path>
+                </svg>
+            </span>
+        </button>
+        <aside class="profile-drawer" id="profileDrawer">
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2c-4.4 0-8 2.2-8 5v1h16v-1c0-2.8-3.6-5-8-5Z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="profile-name" id="profileName">-</p>
+                    <p class="profile-email" id="profileEmail">-</p>
+                </div>
+            </div>
+            <a class="profile-link" href="/mis-boletos">Mis boletos</a>
+            <button class="profile-logout" id="logoutBtn" type="button">Cerrar sesion</button>
+        </aside>
+    </div>
+</header>
+
+<main class="layout wide">
+    <section class="section-band">
+        <h2 class="section-title">Promociones</h2>
+        <p class="section-lead">Elige tu boleto, define la cantidad y agregalo al carrito.</p>
+        <div class="promo-grid">
+            <article class="promo-card" data-id="infantil" data-name="Boleto infantil" data-price="50">
+                <div class="promo-top">
+                    <span class="promo-tag">Acceso especial</span>
+                    <span class="promo-price">$50 MXN</span>
+                </div>
+                <h3>Boleto infantil</h3>
+                <p>Para ninos de 4 a 12 anos. Acceso a zonas familiares.</p>
+                <div class="promo-actions">
+                    <div class="qty-field">
+                        <label class="qty-label" for="qty-infantil">Cantidad</label>
+                        <input id="qty-infantil" class="qty-input" type="number" min="1" value="1">
+                    </div>
+                    <button class="add-cart-btn" type="button" data-add>Agregar al carrito</button>
+                </div>
+            </article>
+            <article class="promo-card" data-id="adulto" data-name="Boleto adulto" data-price="100">
+                <div class="promo-top">
+                    <span class="promo-tag">Entrada general</span>
+                    <span class="promo-price">$100 MXN</span>
+                </div>
+                <h3>Boleto adulto</h3>
+                <p>Acceso completo a conciertos, gastronomia y zonas interactivas.</p>
+                <div class="promo-actions">
+                    <div class="qty-field">
+                        <label class="qty-label" for="qty-adulto">Cantidad</label>
+                        <input id="qty-adulto" class="qty-input" type="number" min="1" value="1">
+                    </div>
+                    <button class="add-cart-btn" type="button" data-add>Agregar al carrito</button>
+                </div>
+            </article>
+            <article class="promo-card" data-id="premium" data-name="Boleto premium" data-price="180">
+                <div class="promo-top">
+                    <span class="promo-tag">Experiencia VIP</span>
+                    <span class="promo-price">$180 MXN</span>
+                </div>
+                <h3>Boleto premium</h3>
+                <p>Incluye acceso preferente y area lounge durante el evento.</p>
+                <div class="promo-actions">
+                    <div class="qty-field">
+                        <label class="qty-label" for="qty-premium">Cantidad</label>
+                        <input id="qty-premium" class="qty-input" type="number" min="1" value="1">
+                    </div>
+                    <button class="add-cart-btn" type="button" data-add>Agregar al carrito</button>
+                </div>
+            </article>
+        </div>
+        <p id="promoMessage" class="create-msg"></p>
+    </section>
+</main>
+
+<button id="cartButton" class="cart-fab" type="button" aria-label="Ir al carrito">
+    <svg class="cart-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M7 18a2 2 0 1 0 2 2 2 2 0 0 0-2-2Zm10 0a2 2 0 1 0 2 2 2 2 0 0 0-2-2ZM7.2 6h12.4a1 1 0 0 1 1 .8l1.3 6.6a1 1 0 0 1-1 1.2H8.1a1 1 0 0 1-1-.8L5.5 5.4H3a1 1 0 1 1 0-2h3.3a1 1 0 0 1 1 .8Z"></path>
+    </svg>
+    <span id="cartCount" class="cart-count hidden">0</span>
+</button>
+
+<script>
+    const tokenKey = "feriaAuthToken";
+    const cartKey = "feriaCart";
+    const profileName = document.getElementById("profileName");
+    const profileEmail = document.getElementById("profileEmail");
+    const profileWrap = document.getElementById("profileWrap");
+    const profileButton = document.getElementById("profileButton");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const cartButton = document.getElementById("cartButton");
+    const cartCount = document.getElementById("cartCount");
+    const promoMessage = document.getElementById("promoMessage");
+
+    function requireToken() {
+        const token = localStorage.getItem(tokenKey);
+        if (!token) {
+            window.location.href = "/login";
+            return null;
+        }
+        return token;
+    }
+
+    async function authFetch(url, options = {}) {
+        const token = requireToken();
+        if (!token) {
+            throw new Error("Sin token");
+        }
+
+        const headers = Object.assign({}, options.headers || {}, {
+            Authorization: `Bearer ${token}`
+        });
+
+        const response = await fetch(url, Object.assign({}, options, { headers }));
+        if (response.status === 401) {
+            localStorage.removeItem(tokenKey);
+            localStorage.removeItem("feriaCustomer");
+            localStorage.removeItem(cartKey);
+            window.location.href = "/login";
+            throw new Error("No autenticado");
+        }
+        return response;
+    }
+
+    function setMessage(target, ok, text) {
+        target.textContent = text;
+        target.className = ok ? "create-msg ok" : "create-msg error";
+    }
+
+    function readCart() {
+        try {
+            const raw = localStorage.getItem(cartKey);
+            return raw ? JSON.parse(raw) : [];
+        } catch (error) {
+            return [];
+        }
+    }
+
+    function writeCart(items) {
+        localStorage.setItem(cartKey, JSON.stringify(items));
+        updateCartCount(items);
+    }
+
+    function updateCartCount(items = readCart()) {
+        const total = items.reduce((sum, item) => sum + (item.qty || 0), 0);
+        cartCount.textContent = total;
+        cartCount.classList.toggle("hidden", total === 0);
+    }
+
+    function showPromoMessage(text, ok = true) {
+        setMessage(promoMessage, ok, text);
+        if (!text) {
+            return;
+        }
+        setTimeout(() => {
+            promoMessage.textContent = "";
+            promoMessage.className = "create-msg";
+        }, 1800);
+    }
+
+    function addToCart(item, qty) {
+        const items = readCart();
+        const existing = items.find(entry => entry.id === item.id);
+        if (existing) {
+            existing.qty += qty;
+        } else {
+            items.push({ ...item, qty });
+        }
+        writeCart(items);
+        showPromoMessage("Agregado al carrito");
+    }
+
+    async function loadProfile() {
+        const response = await authFetch("/api/customers/me");
+        if (!response.ok) {
+            return;
+        }
+        const data = await response.json();
+        profileName.textContent = data.nombre || "-";
+        profileEmail.textContent = data.email || "-";
+    }
+
+    document.querySelectorAll(".promo-card").forEach(card => {
+        const addButton = card.querySelector("[data-add]");
+        const qtyInput = card.querySelector(".qty-input");
+        addButton.addEventListener("click", () => {
+            const qty = Math.max(1, parseInt(qtyInput.value, 10) || 1);
+            const item = {
+                id: card.dataset.id,
+                name: card.dataset.name,
+                price: Number(card.dataset.price)
+            };
+            addToCart(item, qty);
+            qtyInput.value = "1";
+        });
+    });
+
+    profileButton.addEventListener("click", (event) => {
+        event.stopPropagation();
+        const isOpen = profileWrap.classList.toggle("is-open");
+        profileButton.setAttribute("aria-expanded", String(isOpen));
+    });
+
+    document.addEventListener("click", (event) => {
+        if (!profileWrap.contains(event.target)) {
+            profileWrap.classList.remove("is-open");
+            profileButton.setAttribute("aria-expanded", "false");
+        }
+    });
+
+    logoutBtn.addEventListener("click", () => {
+        localStorage.removeItem(tokenKey);
+        localStorage.removeItem("feriaCustomer");
+        localStorage.removeItem(cartKey);
+        window.location.href = "/login";
+    });
+
+    cartButton.addEventListener("click", () => {
+        window.location.href = "/comprar";
+    });
+
+    function init() {
+        requireToken();
+        updateCartCount();
+        loadProfile();
+    }
+
+    init();
+</script>
+</script>
+<script src="/js/site.js"></script>
+</body>
+</html>

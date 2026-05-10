@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escaner de Boletos - Feria</title>
+    <link rel="stylesheet" href="/css/app.css">
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+</head>
+<body>
+<main class="layout">
+    <nav class="nav">
+        <a href="/boletos">Boletos</a>
+        <a class="active" href="/scanner">Escaner</a>
+    </nav>
+
+    <div class="row">
+        <section class="card">
+            <h1>Escaneo en puerta</h1>
+            <p>Escanea el QR del boleto. Solo se puede usar una vez.</p>
+            <div id="reader"></div>
+        </section>
+
+        <section class="card">
+            <h1>Resultado</h1>
+            <div id="resultBox" class="status">Esperando escaneo...</div>
+            <p><strong>ID:</strong> <span id="resultId">-</span></p>
+            <p><strong>Nombre:</strong> <span id="resultName">-</span></p>
+            <p><strong>Ultimo QR:</strong></p>
+            <p id="resultQr" class="mono">-</p>
+        </section>
+    </div>
+</main>
+
+<script>
+    const resultBox = document.getElementById("resultBox");
+    const resultId = document.getElementById("resultId");
+    const resultName = document.getElementById("resultName");
+    const resultQr = document.getElementById("resultQr");
+
+    let lastDecoded = "";
+    let lastDecodedAt = 0;
+    let glowTimer = null;
+
+    function setPageGlow(ok) {
+        if (glowTimer) {
+            clearTimeout(glowTimer);
+            glowTimer = null;
+        }
+
+        document.body.classList.toggle("scan-ok", ok);
+
+        if (ok) {
+            glowTimer = setTimeout(() => {
+                document.body.classList.remove("scan-ok");
+                glowTimer = null;
+            }, 1800);
+        }
+    }
+
+    function setStatus(ok, text) {
+        const dotClass = ok ? "ok" : "error";
+        resultBox.innerHTML = `<span class="status-line"><span class="status-dot ${dotClass}"></span>${text}</span>`;
+        resultBox.className = ok ? "status ok" : "status error";
+        setPageGlow(ok);
+    }
+
+    function decodeBase64Url(value) {
+        try {
+            const base64 = value.replace(/-/g, "+").replace(/_/g, "/");
+            const padded = base64.padEnd(base64.length + (4 - base64.length % 4) % 4, "=");
+            const binary = atob(padded);
+            const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+            return new TextDecoder("utf-8").decode(bytes);
+        } catch (error) {
+            return "";
+        }
+    }
+
+    function parseTicketQr(qrText) {
+        const parts = qrText.split("|");
+        if (parts.length !== 6 || parts[0] !== "FERIAQR") {
+            return null;
+        }
+
+        return {
+            ticketId: parts[1] || "-",
+            nombre: decodeBase64Url(parts[2]) || "-"
+        };
+    }
+
+    async function validateScan(qrText) {
+        const response = await fetch("/api/scan/validate", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ qrText })
+        });
+
+        if (!response.ok) {
+            throw new Error("No se pudo validar");
+        }
+
+        const data = await response.json();
+        setStatus(data.valid, data.message);
+        resultId.textContent = data.ticketId ?? "-";
+        resultName.textContent = data.nombre ?? "-";
+        resultQr.textContent = qrText;
+    }
+
+    function onScanSuccess(decodedText) {
+        const now = Date.now();
+        if (decodedText === lastDecoded && now - lastDecodedAt < 3000) {
+            return;
+        }
+
+        lastDecoded = decodedText;
+        lastDecodedAt = now;
+
+        validateScan(decodedText).catch(() => {
+            const parsed = parseTicketQr(decodedText);
+            if (parsed) {
+                resultId.textContent = parsed.ticketId;
+                resultName.textContent = parsed.nombre;
+            } else {
+                resultId.textContent = "-";
+                resultName.textContent = "-";
+            }
+
+            resultQr.textContent = decodedText;
+            setStatus(false, "Sin conexion al servidor");
+        });
+    }
+
+    const html5QrCodeScanner = new Html5QrcodeScanner(
+        "reader",
+        { fps: 10, qrbox: { width: 260, height: 260 } },
+        false
+    );
+    html5QrCodeScanner.render(onScanSuccess, () => {});
+</script>
+</script>
+<script src="/js/site.js"></script>
+</body>
+</html>

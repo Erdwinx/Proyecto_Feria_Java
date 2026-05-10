@@ -1,0 +1,15 @@
+target/
+
+/tools/
+
+# H2 local database files
+data/*.mv.db
+data/*.trace.db
+
+# Generated local SSL artifacts at repo root
+/ssl/
+
+# IDE and OS noise
+.idea/
+.vscode/
+*.log
