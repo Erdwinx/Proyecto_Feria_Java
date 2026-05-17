@@ -20,7 +20,7 @@
         <div class="panel-stats">
             <div class="stat">
                 <strong>Boletos registrados:</strong>
-                <span class="stat-value">{{ $totalTickets ?? 0 }}</span>
+                <span class="stat-value">{{ $totalScannedTickets ?? 0 }}</span>
             </div>
         </div>
         <p id="selectedEventNotice" class="scan-msg" style="margin-top: 6px;"></p>
@@ -40,7 +40,8 @@
                     <tr>
                         <th>ID</th>
                         <th>Nombre</th>
-                        <th>Fecha</th>
+                        <th>Día</th>
+                        <th>Mes</th>
                         <th>Hora</th>
                     </tr>
                     </thead>
@@ -155,18 +156,33 @@
             const row = document.createElement("tr");
             const idCell = document.createElement("td");
             const nameCell = document.createElement("td");
-            const dateCell = document.createElement("td");
+            const dayCell = document.createElement("td");
+            const monthCell = document.createElement("td");
             const timeCell = document.createElement("td");
             const formatted = formatScanDate(entry.scannedAtEpochSeconds);
 
             idCell.textContent = entry.ticketId ?? "-";
-            nameCell.textContent = entry.nombre ?? "-";
-            dateCell.textContent = formatted.date;
+            
+            // Make ticket name clickable link to /eventos with slug-based hash
+            const nameLink = document.createElement("a");
+            const eventSlug = (entry.nombre ?? "").toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+            nameLink.href = "/eventos#boleto-" + eventSlug;
+            nameLink.textContent = entry.nombre ?? "-";
+            nameLink.style.cursor = "pointer";
+            nameLink.style.color = "#7fbbff";
+            nameLink.style.textDecoration = "underline";
+            nameCell.appendChild(nameLink);
+            
+            // Parse date to separate day and month (formato DD/MM)
+            const dateParts = formatted.date.split("/");
+            dayCell.textContent = dateParts[0] ?? "-";
+            monthCell.textContent = dateParts[1] ?? "-";
             timeCell.textContent = formatted.time;
 
             row.appendChild(idCell);
             row.appendChild(nameCell);
-            row.appendChild(dateCell);
+            row.appendChild(dayCell);
+            row.appendChild(monthCell);
             row.appendChild(timeCell);
             scanTableBody.appendChild(row);
         });

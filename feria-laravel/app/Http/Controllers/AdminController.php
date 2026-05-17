@@ -111,16 +111,17 @@ class AdminController extends Controller
     }
 
     /**
-     * Panel view used for /boletos and /panel. Shows registro and revenue.
+     * Panel view used for /boletos and /panel. Shows registro and scanned tickets.
      */
     public function panel(): View
     {
         $totalTickets = cache()->remember('panel_total_tickets', 300, fn () => Ticket::count());
+        $totalScannedTickets = cache()->remember('panel_total_scanned_tickets', 300, fn () => Ticket::where('escaneado', true)->count());
         $totalCustomers = cache()->remember('panel_total_customers', 300, fn () => Customer::count());
 
-        // Tickets grouped by category to compute revenue using config prices
         return view('boletos', [
             'totalTickets' => $totalTickets,
+            'totalScannedTickets' => $totalScannedTickets,
             'totalCustomers' => $totalCustomers,
         ]);
     }

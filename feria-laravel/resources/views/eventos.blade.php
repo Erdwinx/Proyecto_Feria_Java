@@ -46,7 +46,7 @@
         <h2 class="section-title">Eventos y activaciones</h2>
         <p class="section-lead">Planifica tu visita con los eventos destacados del dia.</p>
         <div class="event-grid">
-            <article class="event-card cover">
+            <article id="boleto-concierto-central" class="event-card cover">
                 <div class="cover-image" style="background-image: linear-gradient(180deg, rgba(6, 13, 38, 0.2), rgba(6, 13, 38, 0.75)), url('/images/concert-cover-1.jpg');"></div>
                 <div class="event-top">
                     <div class="event-meta">
@@ -74,7 +74,7 @@
                     <a href="/comprar?ticketType=concierto&event=concierto-central&selectedEvent=concierto-central">Ver boleto</a>
                 </div>
             </article>
-            <article class="event-card cover">
+            <article id="boleto-ritmo-urbano" class="event-card cover">
                 <div class="cover-image" style="background-image: linear-gradient(180deg, rgba(7, 14, 31, 0.2), rgba(7, 14, 31, 0.75)), url('/images/concert-cover-2.jpg');"></div>
                 <div class="event-top">
                     <div class="event-meta">
@@ -102,7 +102,7 @@
                     <a href="/comprar?ticketType=concierto&event=ritmo-urbano&selectedEvent=ritmo-urbano">Ver boleto</a>
                 </div>
             </article>
-            <article class="event-card cover">
+            <article id="boleto-electro-fest" class="event-card cover">
                 <div class="cover-image" style="background-image: linear-gradient(180deg, rgba(7, 14, 31, 0.2), rgba(7, 14, 31, 0.75)), url('/images/concert-cover-3.jpg');"></div>
                 <div class="event-top">
                     <div class="event-meta">
@@ -204,6 +204,25 @@
     function init() {
         requireToken();
         loadProfile();
+        highlightEventFromHash();
+    }
+
+    function highlightEventFromHash() {
+        const hash = window.location.hash;
+        if (hash && hash.startsWith("#boleto-")) {
+            const eventCard = document.querySelector(hash);
+            if (eventCard) {
+                eventCard.scrollIntoView({ behavior: "smooth", block: "center" });
+                eventCard.style.borderColor = "#7fbbff";
+                eventCard.style.borderWidth = "3px";
+                eventCard.style.boxShadow = "0 0 20px rgba(127, 187, 255, 0.5)";
+                setTimeout(() => {
+                    eventCard.style.borderColor = "";
+                    eventCard.style.borderWidth = "";
+                    eventCard.style.boxShadow = "";
+                }, 3000);
+            }
+        }
     }
 
     init();
