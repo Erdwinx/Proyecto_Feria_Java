@@ -23,64 +23,81 @@ class PurchaseService
         $createdTickets = [];
 
         if ($tipoEvento === 'concierto') {
-            [$allSeats, $categories, $seatCategory] = $this->extractConcertSeatsAndCategories($payload);
-            $primaryCategory = in_array('vip', $categories, true) ? 'vip' : (in_array('grada', $categories, true) ? 'grada' : 'general');
-
-            DB::transaction(function () use ($payload, $allSeats, $seatCategory, $primaryCategory, $customer, &$createdTickets, $categories) {
-                if (!empty($allSeats)) {
-                    $conflicts = [];
-                    foreach ($allSeats as $seat) {
-                        try {
-                            SeatReservation::create([
-                                'fecha_evento' => (string) $payload['fechaEvento'],
-                                'category' => (string) $seatCategory,
-                                'seat_number' => $seat,
-                                'status' => 'reserved',
-                            ]);
-                        } catch (QueryException $qe) {
-                            $conflicts[] = $seat;
+            $itemsByCategory = $this->groupConcertItemsByCategory($payload);
+            
+            DB::transaction(function () use ($payload, $itemsByCategory, $customer, &$createdTickets) {
+                foreach ($itemsByCategory as $category => $items) {
+                    $allSeats = [];
+                    
+                    // Collect all seats for this category
+                    foreach ($items as $item) {
+                        if (!empty($item['seatNumbers']) && is_array($item['seatNumbers'])) {
+                            foreach ($item['seatNumbers'] as $seat) {
+                                if (is_string($seat) && $seat !== '') {
+                                    $allSeats[] = $seat;
+                                }
+                            }
                         }
                     }
-
-                    if (!empty($conflicts)) {
-                        throw new SeatUnavailableException($conflicts);
+                    $allSeats = array_values(array_unique($allSeats));
+                    
+                    // Reserve seats for this category
+                    if (!empty($allSeats)) {
+                        $conflicts = [];
+                        foreach ($allSeats as $seat) {
+                            try {
+                                SeatReservation::create([
+                                    'fecha_evento' => (string) $payload['fechaEvento'],
+                                    'category' => $category,
+                                    'seat_number' => $seat,
+                                    'status' => 'reserved',
+                                ]);
+                            } catch (QueryException $qe) {
+                                $conflicts[] = $seat;
+                            }
+                        }
+                        
+                        if (!empty($conflicts)) {
+                            throw new SeatUnavailableException($conflicts);
+                        }
                     }
+                    
+                    // Create one package per category
+                    $package = Package::create([
+                        'id' => $this->nextPackageId(),
+                        'nombre' => sprintf('Concierto %s - %s (%d asientos)', (string) $payload['fechaEvento'], strtoupper($category), count($allSeats)),
+                        'tipo_evento' => 'concierto',
+                        'fecha_evento' => (string) $payload['fechaEvento'],
+                        'qr_text' => null,
+                        'qr_generated_at' => null,
+                    ]);
+                    
+                    $ticketName = sprintf('%s - Paquete %d asientos', ucfirst($category), count($allSeats));
+                    
+                    $ticket = Ticket::create([
+                        'id' => $this->nextTicketId($ticketName),
+                        'nombre' => $ticketName,
+                        'fecha_evento' => (string) $payload['fechaEvento'],
+                        'tipo_evento' => 'concierto',
+                        'category' => $category,
+                        'seat_numbers' => $allSeats,
+                        'package_id' => $package->id,
+                        'escaneado' => false,
+                        'customer_id' => $customer->id,
+                    ]);
+                    
+                    if (!empty($allSeats)) {
+                        SeatReservation::query()
+                            ->whereDate('fecha_evento', (string) $payload['fechaEvento'])
+                            ->where('category', $category)
+                            ->whereIn('seat_number', $allSeats)
+                            ->update(['ticket_id' => $ticket->id, 'status' => 'sold']);
+                    }
+                    
+                    $createdTickets[] = $ticket;
                 }
-
-                $package = Package::create([
-                    'id' => $this->nextPackageId(),
-                    'nombre' => sprintf('Concierto %s - %s (%d asientos)', (string) $payload['fechaEvento'], strtoupper($primaryCategory), count($allSeats)),
-                    'tipo_evento' => 'concierto',
-                    'fecha_evento' => (string) $payload['fechaEvento'],
-                    'qr_text' => null,
-                    'qr_generated_at' => null,
-                ]);
-
-                $ticketName = sprintf('%s - Paquete %d asientos', ucfirst((string) (array_unique($categories)[0] ?? 'General')), count($allSeats));
-
-                $ticket = Ticket::create([
-                    'id' => $this->nextTicketId($ticketName),
-                    'nombre' => $ticketName,
-                    'fecha_evento' => (string) $payload['fechaEvento'],
-                    'tipo_evento' => 'concierto',
-                    'category' => $primaryCategory,
-                    'seat_numbers' => $allSeats,
-                    'package_id' => $package->id,
-                    'escaneado' => false,
-                    'customer_id' => $customer->id,
-                ]);
-
-                if (!empty($allSeats)) {
-                    SeatReservation::query()
-                        ->whereDate('fecha_evento', (string) $payload['fechaEvento'])
-                        ->where('category', $primaryCategory)
-                        ->whereIn('seat_number', $allSeats)
-                        ->update(['ticket_id' => $ticket->id, 'status' => 'sold']);
-                }
-
-                $createdTickets[] = $ticket;
             });
-
+            
             return $createdTickets;
         }
 
@@ -113,30 +130,23 @@ class PurchaseService
     }
 
     /**
+     * Group concert items by category to create separate packages
      * @param array<string, mixed> $payload
-     * @return array{0: array<int, string>, 1: array<int, string>, 2: string|null}
+     * @return array<string, array>
      */
-    private function extractConcertSeatsAndCategories(array $payload): array
+    private function groupConcertItemsByCategory(array $payload): array
     {
-        $allSeats = [];
-        $categories = [];
-        $seatCategory = null;
-
+        $grouped = [];
+        
         foreach ((array) $payload['items'] as $item) {
-            $itemCategory = (string) ($item['category'] ?? 'vip');
-            $categories[] = $itemCategory;
-            $seatCategory = $seatCategory ?? $itemCategory;
-
-            if (!empty($item['seatNumbers']) && is_array($item['seatNumbers'])) {
-                foreach ($item['seatNumbers'] as $seat) {
-                    if (is_string($seat) && $seat !== '') {
-                        $allSeats[] = $seat;
-                    }
-                }
+            $category = (string) ($item['category'] ?? 'general');
+            if (!isset($grouped[$category])) {
+                $grouped[$category] = [];
             }
+            $grouped[$category][] = $item;
         }
-
-        return [array_values(array_unique($allSeats)), $categories, $seatCategory];
+        
+        return $grouped;
     }
 
     private function nextPackageId(): string

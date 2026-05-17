@@ -281,7 +281,7 @@ class PurchaseTicketTest extends TestCase
         $availableSeats = $availability->json('availableSeats');
         $soldSeats = $availability->json('soldSeats');
 
-        $this->assertSame(['grada', 'vip'], $allowedCategories);
+        $this->assertSame(['general', 'grada', 'vip'], $allowedCategories);
         $this->assertIsArray($availableSeats);
         $this->assertIsArray($soldSeats);
         $this->assertNotContains('A1', $availableSeats);

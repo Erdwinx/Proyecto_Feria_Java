@@ -58,7 +58,7 @@ class TicketApiController extends Controller
             'category' => $category,
             'availableSeats' => $availableSeats,
             'soldSeats' => array_values($soldSeats),
-            'allowedCategories' => $tipoEvento === 'concierto' ? ['grada', 'vip'] : ['general', 'grada', 'vip'],
+            'allowedCategories' => ['general', 'grada', 'vip'],
         ]);
     }
 
