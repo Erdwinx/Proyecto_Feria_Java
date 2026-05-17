@@ -71,7 +71,7 @@
                     </div>
                 </div>
                 <div class="event-footer full-width">
-                    <a href="/comprar?ticketType=concierto&event=concierto-central&selectedEvent=concierto-central">Ver boleto</a>
+                    <a href="/promociones">Ver boleto</a>
                 </div>
             </article>
             <article id="boleto-ritmo-urbano" class="event-card cover">
@@ -99,7 +99,7 @@
                     </div>
                 </div>
                 <div class="event-footer full-width">
-                    <a href="/comprar?ticketType=concierto&event=ritmo-urbano&selectedEvent=ritmo-urbano">Ver boleto</a>
+                    <a href="/promociones">Ver boleto</a>
                 </div>
             </article>
             <article id="boleto-electro-fest" class="event-card cover">
@@ -127,7 +127,7 @@
                     </div>
                 </div>
                 <div class="event-footer full-width">
-                    <a href="/comprar?ticketType=concierto&event=electro-fest&selectedEvent=electro-fest">Ver boleto</a>
+                    <a href="/promociones">Ver boleto</a>
                 </div>
             </article>
         </div>

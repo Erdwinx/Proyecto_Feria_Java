@@ -34,14 +34,23 @@
                 <button id="recoverBtn" type="button">Recuperar boleto</button>
                 <p class="scan-msg">Clave requerida: RECUPERAR-2026</p>
             </div>
+            <div class="filter-controls" style="margin-bottom: 16px; display: flex; gap: 12px; align-items: center;">
+                <label for="filterDay">Filtrar por día:</label>
+                <select id="filterDay">
+                    <option value="">-- Todos los días --</option>
+                </select>
+                <label for="filterMonth" style="margin-left: 16px;">Filtrar por mes:</label>
+                <select id="filterMonth">
+                    <option value="">-- Todos los meses --</option>
+                </select>
+            </div>
             <div class="table-wrap">
                 <table class="scan-table">
                     <thead>
                     <tr>
                         <th>ID</th>
                         <th>Nombre</th>
-                        <th>Día</th>
-                        <th>Mes</th>
+                        <th>Fecha</th>
                         <th>Hora</th>
                     </tr>
                     </thead>
@@ -89,6 +98,10 @@
     <script>
     const tabRegister = document.getElementById("tabRegister");
     const panelRegister = document.getElementById("panelRegister");
+    const filterDay = document.getElementById("filterDay");
+    const filterMonth = document.getElementById("filterMonth");
+
+    let allScanEntries = [];
 
     const ticketModal = document.getElementById("ticketModal");
     const closeModalBtn = document.getElementById("closeModalBtn");
@@ -148,6 +161,63 @@
         };
     }
 
+    function updateFilterOptions() {
+        const days = new Set();
+        const months = new Set();
+
+        allScanEntries.forEach(entry => {
+            const formatted = formatScanDate(entry.scannedAtEpochSeconds);
+            const dateParts = formatted.date.split("/");
+            if (dateParts[0]) days.add(dateParts[0]);
+            if (dateParts[1]) months.add(dateParts[1]);
+        });
+
+        const dayOptions = Array.from(days).sort();
+        const monthOptions = Array.from(months).sort();
+
+        filterDay.innerHTML = '<option value="">-- Todos los días --</option>';
+        dayOptions.forEach(day => {
+            const option = document.createElement("option");
+            option.value = day;
+            option.textContent = day;
+            filterDay.appendChild(option);
+        });
+
+        filterMonth.innerHTML = '<option value="">-- Todos los meses --</option>';
+        monthOptions.forEach(month => {
+            const option = document.createElement("option");
+            option.value = month;
+            option.textContent = month;
+            filterMonth.appendChild(option);
+        });
+    }
+
+    function applyFilters() {
+        const selectedDay = filterDay.value;
+        const selectedMonth = filterMonth.value;
+
+        scanTableBody.innerHTML = "";
+        
+        let filtered = allScanEntries;
+        if (selectedDay) {
+            filtered = filtered.filter(entry => {
+                const formatted = formatScanDate(entry.scannedAtEpochSeconds);
+                const dateParts = formatted.date.split("/");
+                return dateParts[0] === selectedDay;
+            });
+        }
+        if (selectedMonth) {
+            filtered = filtered.filter(entry => {
+                const formatted = formatScanDate(entry.scannedAtEpochSeconds);
+                const dateParts = formatted.date.split("/");
+                return dateParts[1] === selectedMonth;
+            });
+        }
+
+        scanEmpty.style.display = filtered.length ? "none" : "block";
+        renderScanLog(filtered);
+    }
+
     function renderScanLog(entries) {
         scanTableBody.innerHTML = "";
         scanEmpty.style.display = entries.length ? "none" : "block";
@@ -156,33 +226,18 @@
             const row = document.createElement("tr");
             const idCell = document.createElement("td");
             const nameCell = document.createElement("td");
-            const dayCell = document.createElement("td");
-            const monthCell = document.createElement("td");
+            const dateCell = document.createElement("td");
             const timeCell = document.createElement("td");
             const formatted = formatScanDate(entry.scannedAtEpochSeconds);
 
             idCell.textContent = entry.ticketId ?? "-";
-            
-            // Make ticket name clickable link to /eventos with slug-based hash
-            const nameLink = document.createElement("a");
-            const eventSlug = (entry.nombre ?? "").toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
-            nameLink.href = "/eventos#boleto-" + eventSlug;
-            nameLink.textContent = entry.nombre ?? "-";
-            nameLink.style.cursor = "pointer";
-            nameLink.style.color = "#7fbbff";
-            nameLink.style.textDecoration = "underline";
-            nameCell.appendChild(nameLink);
-            
-            // Parse date to separate day and month (formato DD/MM)
-            const dateParts = formatted.date.split("/");
-            dayCell.textContent = dateParts[0] ?? "-";
-            monthCell.textContent = dateParts[1] ?? "-";
+            nameCell.textContent = entry.nombre ?? "-";
+            dateCell.textContent = formatted.date;
             timeCell.textContent = formatted.time;
 
             row.appendChild(idCell);
             row.appendChild(nameCell);
-            row.appendChild(dayCell);
-            row.appendChild(monthCell);
+            row.appendChild(dateCell);
             row.appendChild(timeCell);
             scanTableBody.appendChild(row);
         });
@@ -197,10 +252,11 @@
             return;
         }
 
-        const entries = await response.json();
-        const sorted = entries.sort((a, b) => (b.scannedAtEpochSeconds || 0) - (a.scannedAtEpochSeconds || 0));
+        allScanEntries = await response.json();
+        allScanEntries = allScanEntries.sort((a, b) => (b.scannedAtEpochSeconds || 0) - (a.scannedAtEpochSeconds || 0));
         scanEmpty.textContent = "No hay registros aun.";
-        renderScanLog(sorted);
+        updateFilterOptions();
+        applyFilters();
     }
 
     function stopScanPolling() {
@@ -430,6 +486,8 @@
 
     tabRegister.addEventListener("click", () => switchTab("register"));
     recoverBtn.addEventListener("click", recoverTicket);
+    filterDay.addEventListener("change", applyFilters);
+    filterMonth.addEventListener("change", applyFilters);
 
     function init() {
         const params = new URLSearchParams(window.location.search);
