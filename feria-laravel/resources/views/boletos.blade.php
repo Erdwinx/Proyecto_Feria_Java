@@ -424,8 +424,6 @@
     recoverBtn.addEventListener("click", recoverTicket);
 
     function init() {
-        const today = new Date().toISOString().split("T")[0];
-
         const params = new URLSearchParams(window.location.search);
         const selectedEvent = params.get("selectedEvent") || params.get("event");
         if (selectedEvent) {

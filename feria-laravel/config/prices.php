@@ -1,10 +1,11 @@
 <?php
 
 return [
-    // Valores en pesos chilenos (CLP). Enteros sin decimales.
-    'tickets' => [
-        'general' => 5000,
-        'grada' => 8000,
-        'vip' => 15000,
-    ],
+    // Valores en pesos mexicanos (MXN). Enteros sin decimales.
+        'tickets' => [
+            // Valores sugeridos en MXN (ajustables según tu modelo de precios)
+            'general' => 200,
+            'grada' => 350,
+            'vip' => 700,
+        ],
 ];

@@ -132,10 +132,30 @@
         <p style="margin: 0; color: #666;">{{ now()->format('d/m/Y H:i') }}</p>
     </div>
 
+    <form method="get" action="/admin" style="margin-bottom:16px; display:flex; gap:8px; align-items:center;">
+        <label for="from">Desde</label>
+        <input id="from" type="date" name="from" value="{{ $filterFrom ?? '' }}">
+        <label for="to">Hasta</label>
+        <input id="to" type="date" name="to" value="{{ $filterTo ?? '' }}">
+        <label for="event">Evento</label>
+        <select id="event" name="event">
+            <option value="">Todos</option>
+            @foreach($events as $ev)
+                <option value="{{ $ev->fecha_evento->format('Y-m-d') }}" {{ (isset($filterEvent) && $filterEvent == $ev->fecha_evento->format('Y-m-d')) ? 'selected' : '' }}>{{ $ev->nombre }} - {{ $ev->fecha_evento->format('d/m/Y') }}</option>
+            @endforeach
+        </select>
+        <button type="submit" class="admin-back">Filtrar</button>
+    </form>
+
     <div class="stats-grid">
         <div class="stat-card">
             <h3>Total Boletos</h3>
             <div class="value">{{ $totalTickets }}</div>
+        </div>
+        <div class="stat-card">
+            <h3>Recaudación (MXN)</h3>
+            <div class="value" style="color: #28a745;">{{ isset($totalRevenue) ? 'MX$ ' . number_format($totalRevenue, 0, ',', '.') : 'MX$ 0' }}</div>
+            <div style="font-size:12px; margin-top:8px; color:#666;">Filtrada: {{ isset($filteredRevenue) ? 'MX$ ' . number_format($filteredRevenue, 0, ',', '.') : 'MX$ 0' }}</div>
         </div>
         <div class="stat-card">
             <h3>Boletos Escaneados</h3>

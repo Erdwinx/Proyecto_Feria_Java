@@ -7,10 +7,11 @@ use App\Models\ScanLogEntry;
 use App\Models\Customer;
 use Carbon\Carbon;
 use Illuminate\View\View;
+use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
-    public function dashboard(): View
+    public function dashboard(Request $request): View
     {
         $totalTickets = cache()->remember('admin_total_tickets', 300, fn () => Ticket::count());
         $totalScannedTickets = cache()->remember('admin_total_scanned_tickets', 300, fn () => Ticket::where('escaneado', true)->count());
@@ -46,6 +47,51 @@ class AdminController extends Controller
                 ->values();
         });
 
+        // compute total revenue (MXN) by category using prices config
+        $ticketsByCategory = Ticket::selectRaw('category, COUNT(*) as count')
+            ->groupBy('category')
+            ->get();
+
+        $prices = config('prices.tickets', ['general' => 0, 'grada' => 0, 'vip' => 0]);
+        $totalRevenue = 0;
+        foreach ($ticketsByCategory as $row) {
+            $cat = $row->category ?? 'general';
+            $count = (int) $row->count;
+            $price = $prices[$cat] ?? $prices['general'] ?? 0;
+            $totalRevenue += $count * $price;
+        }
+
+        // --- Filtered revenue based on request (from, to, event) ---
+        $from = $request->query('from');
+        $to = $request->query('to');
+        $eventId = $request->query('event');
+
+        $ticketsQuery = Ticket::query();
+        if ($from) {
+            $ticketsQuery->whereDate('fecha_evento', '>=', $from);
+        }
+        if ($to) {
+            $ticketsQuery->whereDate('fecha_evento', '<=', $to);
+        }
+        if ($eventId) {
+            $ticketsQuery->where('fecha_evento', $eventId);
+        }
+
+        $ticketsByCategoryFiltered = $ticketsQuery->selectRaw('category, COUNT(*) as count')
+            ->groupBy('category')
+            ->get();
+
+        $filteredRevenue = 0;
+        foreach ($ticketsByCategoryFiltered as $row) {
+            $cat = $row->category ?? 'general';
+            $count = (int) $row->count;
+            $price = $prices[$cat] ?? $prices['general'] ?? 0;
+            $filteredRevenue += $count * $price;
+        }
+
+        // load events list for the filter selector
+        $events = \App\Models\Event::query()->orderBy('fecha_evento')->get();
+
         return view('admin', [
             'totalTickets' => $totalTickets,
             'totalScannedTickets' => $totalScannedTickets,
@@ -55,6 +101,12 @@ class AdminController extends Controller
             'ticketsByType' => $ticketsByType,
             'recentScans' => $recentScans,
             'scansByDate' => $scansByDate,
+            'totalRevenue' => $totalRevenue,
+            'filteredRevenue' => $filteredRevenue,
+            'events' => $events,
+            'filterFrom' => $from,
+            'filterTo' => $to,
+            'filterEvent' => $eventId,
         ]);
     }
 
@@ -67,25 +119,9 @@ class AdminController extends Controller
         $totalCustomers = cache()->remember('panel_total_customers', 300, fn () => Customer::count());
 
         // Tickets grouped by category to compute revenue using config prices
-        $ticketsByCategory = cache()->remember('panel_tickets_by_category', 300, fn () => Ticket::selectRaw('category, COUNT(*) as count')
-            ->groupBy('category')
-            ->get()
-        );
-
-        $prices = config('prices.tickets', ['general' => 0, 'grada' => 0, 'vip' => 0]);
-
-        $totalRevenue = 0;
-        foreach ($ticketsByCategory as $row) {
-            $cat = $row->category ?? 'general';
-            $count = (int) $row->count;
-            $price = $prices[$cat] ?? $prices['general'] ?? 0;
-            $totalRevenue += $count * $price;
-        }
-
         return view('boletos', [
             'totalTickets' => $totalTickets,
             'totalCustomers' => $totalCustomers,
-            'totalRevenue' => $totalRevenue,
         ]);
     }
 }
