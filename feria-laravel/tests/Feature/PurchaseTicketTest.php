@@ -46,7 +46,7 @@ class PurchaseTicketTest extends TestCase
                         'category' => 'general',
                         'seatNumbers' => [],
                         'price' => 100,
-                        'qty' => 1,
+                        'qty' => 3,
                     ],
                 ],
             ]);
@@ -54,8 +54,11 @@ class PurchaseTicketTest extends TestCase
         $response->assertStatus(200);
         $response->assertJsonStructure([
             '0' => ['id', 'nombre', 'fechaEvento', 'tipoEvento', 'escaneado'],
+            '1' => ['id', 'nombre', 'fechaEvento', 'tipoEvento', 'escaneado'],
+            '2' => ['id', 'nombre', 'fechaEvento', 'tipoEvento', 'escaneado'],
         ]);
         $this->assertDatabaseHas('tickets', ['tipo_evento' => 'feria']);
+        $this->assertCount(3, Ticket::query()->where('tipo_evento', 'feria')->get());
     }
 
     public function test_customer_can_purchase_concert_package()

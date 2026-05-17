@@ -102,17 +102,21 @@ class PurchaseService
         }
 
         foreach ((array) $payload['items'] as $item) {
-            $createdTickets[] = Ticket::create([
-                'id' => $this->nextTicketId((string) $item['name']),
-                'nombre' => (string) $item['name'],
-                'fecha_evento' => (string) $payload['fechaEvento'],
-                'tipo_evento' => $tipoEvento,
-                'category' => $item['category'] ?? null,
-                'seat_numbers' => [],
-                'package_id' => null,
-                'escaneado' => false,
-                'customer_id' => $customer->id,
-            ]);
+            $quantity = max(1, (int) ($item['qty'] ?? 1));
+
+            for ($i = 0; $i < $quantity; $i++) {
+                $createdTickets[] = Ticket::create([
+                    'id' => $this->nextTicketId((string) $item['name']),
+                    'nombre' => (string) $item['name'],
+                    'fecha_evento' => (string) $payload['fechaEvento'],
+                    'tipo_evento' => $tipoEvento,
+                    'category' => $item['category'] ?? null,
+                    'seat_numbers' => [],
+                    'package_id' => null,
+                    'escaneado' => false,
+                    'customer_id' => $customer->id,
+                ]);
+            }
         }
 
         return $createdTickets;
