@@ -19,16 +19,8 @@
         <p>Revisa el registro de escaneos y métricas del panel.</p>
         <div class="panel-stats">
             <div class="stat">
-                <strong>Recaudación (CLP):</strong>
-                <span class="stat-value">{{ '$ ' . number_format($totalRevenue ?? 0, 0, ',', '.') }}</span>
-            </div>
-            <div class="stat">
-                <strong>Total boletos:</strong>
+                <strong>Boletos registrados:</strong>
                 <span class="stat-value">{{ $totalTickets ?? 0 }}</span>
-            </div>
-            <div class="stat">
-                <strong>Clientes:</strong>
-                <span class="stat-value">{{ $totalCustomers ?? 0 }}</span>
             </div>
         </div>
         <p id="selectedEventNotice" class="scan-msg" style="margin-top: 6px;"></p>
