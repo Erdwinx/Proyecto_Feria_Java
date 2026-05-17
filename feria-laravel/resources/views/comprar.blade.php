@@ -496,6 +496,13 @@
         return formatter.format(amount);
     }
 
+    function removeFromCart(itemId) {
+        let items = readCart();
+        items = items.filter(item => item.id !== itemId);
+        writeCart(items);
+        showMessage('Item eliminado del carrito', true);
+    }
+
     function updateCartDisplay() {
         const items = readCart();
         const total = items.reduce((sum, item) => sum + (item.price * item.qty), 0);
@@ -505,17 +512,40 @@
         items.forEach(item => {
             const row = document.createElement("div");
             row.className = "cart-item";
-            row.innerHTML = `
-                <div>
-                    <div style="margin-bottom: 0.25rem;">
-                        <strong>${item.name}</strong>
-                    </div>
-                    ${item.dateEvento ? `<div style="font-size: 0.85rem; color: var(--muted);">📅 ${item.dateEvento}</div>` : ''}
-                    ${item.eventName ? `<div style="font-size: 0.85rem; color: var(--muted);">${item.eventName}</div>` : ''}
-                    <span class="cart-qty">x${item.qty}</span>
+            row.style.display = "flex";
+            row.style.justifyContent = "space-between";
+            row.style.alignItems = "center";
+            row.style.paddingRight = "10px";
+            
+            const infoDiv = document.createElement("div");
+            infoDiv.style.flex = "1";
+            infoDiv.innerHTML = `
+                <div style="margin-bottom: 0.25rem;">
+                    <strong>${item.name}</strong>
                 </div>
-                <span>${formatMoney(item.price * item.qty)}</span>
+                ${item.dateEvento ? `<div style="font-size: 0.85rem; color: var(--muted);">📅 ${item.dateEvento}</div>` : ''}
+                ${item.eventName ? `<div style="font-size: 0.85rem; color: var(--muted);">${item.eventName}</div>` : ''}
+                <span class="cart-qty">x${item.qty}</span>
             `;
+            
+            const priceDiv = document.createElement("div");
+            priceDiv.style.marginRight = "10px";
+            priceDiv.textContent = formatMoney(item.price * item.qty);
+            
+            const removeBtn = document.createElement("button");
+            removeBtn.type = "button";
+            removeBtn.textContent = "🗑️";
+            removeBtn.title = "Eliminar del carrito";
+            removeBtn.style.background = "none";
+            removeBtn.style.border = "none";
+            removeBtn.style.cursor = "pointer";
+            removeBtn.style.fontSize = "1.2em";
+            removeBtn.style.padding = "0 5px";
+            removeBtn.addEventListener("click", () => removeFromCart(item.id));
+            
+            row.appendChild(infoDiv);
+            row.appendChild(priceDiv);
+            row.appendChild(removeBtn);
             cartItems.appendChild(row);
         });
 
@@ -699,12 +729,13 @@
         });
 
         addSeatsToCart.addEventListener("click", () => {
-            if (selectedSeats.length === 0) return;
+            if (selectedSeatCategory !== "general" && selectedSeats.length === 0) return;
 
             const eventValue = eventDate.value;
             const eventName = eventsList.find(ev => ev.fecha_evento === eventValue)?.nombre || 'Evento';
+            const tipoEvento = isConcertDate(eventValue) ? 'concierto' : 'feria';
             const item = {
-                id: `${eventValue}-${selectedSeatCategory}-${selectedSeats.join(',')}`,
+                id: `${eventValue}-${selectedSeatCategory}-${selectedSeats.join(',')}-${Math.random()}`,
                 name: selectedSeatCategory === "general"
                     ? `Boleto GENERAL` 
                     : `Boleto ${selectedSeatCategory.toUpperCase()} - Asientos ${selectedSeats.join(", ")}`,
@@ -712,12 +743,13 @@
                 seatNumbers: selectedSeatCategory === "general" ? [] : selectedSeats.slice(),
                 dateEvento: eventValue,
                 eventName: eventName,
-                price: selectedSeatCategory === "vip" ? 250 * selectedSeats.length : (selectedSeatCategory === "grada" ? 180 * selectedSeats.length : 100 * selectedSeats.length),
+                tipoEvento: tipoEvento,
+                price: selectedSeatCategory === "vip" ? 250 * selectedSeats.length : (selectedSeatCategory === "grada" ? 180 * selectedSeats.length : 100),
                 qty: 1,
             };
             addToCart(item, 1);
 
-            showMessage(`${selectedSeats.length} asiento${selectedSeats.length > 1 ? 's' : ''} agregado${selectedSeats.length > 1 ? 's' : ''} al carrito`, true);
+            showMessage(`${selectedSeatCategory === "general" ? 1 : selectedSeats.length} boleto${selectedSeats.length > 1 ? 's' : ''} agregado${selectedSeats.length > 1 ? 's' : ''} al carrito`, true);
             selectedSeats = [];
             document.querySelectorAll(".seat-map .seat-btn").forEach(btn => btn.classList.remove("selected"));
             updateSeatSelectionInfo();
@@ -823,11 +855,20 @@
     }
 
     async function createTicket(nombre, fechaEvento, items) {
-        console.log("Creando ticket(s) con:", { nombre, fechaEvento, items });
+        // Sanitizar items para asegurar que tienen todos los campos requeridos
+        const sanitizedItems = items.map(item => ({
+            name: item.name || 'Boleto',
+            category: item.category || 'general',
+            seatNumbers: item.seatNumbers || [],
+            price: parseFloat(item.price) || 0,
+            qty: parseInt(item.qty) || 1
+        }));
+        
+        console.log("Creando ticket(s) con:", { nombre, fechaEvento, items: sanitizedItems });
         const response = await authFetch("/api/customers/tickets", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ nombre, fechaEvento, items })
+            body: JSON.stringify({ nombre, fechaEvento, items: sanitizedItems })
         });
         console.log("Respuesta del servidor:", response.status);
         if (!response.ok) {
@@ -906,6 +947,27 @@
                 setMessage(checkoutMessage, false, "No hay items en el carrito");
                 return;
             }
+            
+            // Validar que todos los items tengan los campos requeridos
+            for (const item of cartItemsList) {
+                if (!item.name) {
+                    setMessage(checkoutMessage, false, "Item sin nombre");
+                    return;
+                }
+                if (!item.category) {
+                    setMessage(checkoutMessage, false, "Item sin categoría");
+                    return;
+                }
+                if (item.price === undefined || item.price === null) {
+                    setMessage(checkoutMessage, false, "Item sin precio");
+                    return;
+                }
+                if (!item.qty || item.qty < 1) {
+                    setMessage(checkoutMessage, false, "Item sin cantidad");
+                    return;
+                }
+            }
+            
             const ticketResult = await createTicket(nombre, fecha, cartItemsList);
             if (ticketResult) {
                 localStorage.removeItem(cartKey);
@@ -986,15 +1048,17 @@
             const selectedDate = eventDate.value || (eventsList[0]?.fecha_evento || '');
             const eventName = eventsList.find(ev => ev.fecha_evento === selectedDate)?.nombre || 'Feria Local';
             addToCart({
-                id: `fair-${slugify(ticketName)}`,
+                id: `fair-${slugify(ticketName)}-${selectedDate}`,
                 name: ticketName,
                 price: 100,
                 category: 'general',
                 seatNumbers: [],
                 dateEvento: selectedDate,
                 eventName: eventName,
+                tipoEvento: 'feria',
                 qty: 1
             }, qty);
+            fairQty.value = 1;
             showMessage(`${qty} boleto${qty > 1 ? 's' : ''} de feria agregado${qty > 1 ? 's' : ''} al carrito`, true);
         });
     }
