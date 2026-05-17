@@ -86,7 +86,19 @@
     async function readErrorMessage(response) {
         try {
             const data = await response.json();
-            return data.message || "No se pudo completar la solicitud";
+            if (data.message) {
+                return data.message;
+            }
+
+            if (data.errors) {
+                const firstKey = Object.keys(data.errors)[0];
+                const firstMessage = firstKey && Array.isArray(data.errors[firstKey]) ? data.errors[firstKey][0] : null;
+                if (firstMessage) {
+                    return firstMessage;
+                }
+            }
+
+            return "No se pudo completar la solicitud";
         } catch (error) {
             const text = await response.text();
             return text || "No se pudo completar la solicitud";
@@ -142,7 +154,11 @@
         });
 
         if (!response.ok) {
-            setMessage(registerMessage, false, await readErrorMessage(response));
+            const message = await readErrorMessage(response);
+            setMessage(registerMessage, false, message);
+            if (message.toLowerCase().includes("correo ya esta registrado")) {
+                document.getElementById("registerEmail").focus();
+            }
             return;
         }
 

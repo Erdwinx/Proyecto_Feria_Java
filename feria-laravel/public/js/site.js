@@ -14,7 +14,21 @@
             <span id="cartCount" class="cart-count hidden">0</span>
         `;
         document.body.appendChild(btn);
-        btn.addEventListener('click', () => { window.location.href = '/comprar'; });
+        btn.addEventListener('click', () => {
+            if (window.location.pathname.replace(/\/$/, '') === '/comprar') {
+                const checkoutPanel = document.getElementById('checkoutPanel');
+                if (checkoutPanel) {
+                    const isHidden = checkoutPanel.classList.contains('hidden');
+                    checkoutPanel.classList.toggle('hidden', !isHidden);
+                    if (isHidden) {
+                        checkoutPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }
+                return;
+            }
+
+            window.location.href = '/comprar';
+        });
     }
 
     function updateCartCount(){
@@ -46,11 +60,25 @@
         });
     }
 
+    function highlightActiveNav(){
+        const path = window.location.pathname.replace(/\/$/, '') || '/';
+        document.querySelectorAll('.topnav a').forEach((link) => {
+            const href = new URL(link.getAttribute('href'), window.location.origin).pathname.replace(/\/$/, '') || '/';
+            const isActive = href === path;
+            link.classList.toggle('active', isActive);
+            if (isActive) {
+                link.setAttribute('aria-current', 'page');
+            } else {
+                link.removeAttribute('aria-current');
+            }
+        });
+    }
+
     // run on DOMContentLoaded
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => { createCartFab(); updateCartCount(); enhanceProfile(); });
+        document.addEventListener('DOMContentLoaded', () => { createCartFab(); updateCartCount(); enhanceProfile(); highlightActiveNav(); });
     } else {
-        createCartFab(); updateCartCount(); enhanceProfile();
+        createCartFab(); updateCartCount(); enhanceProfile(); highlightActiveNav();
     }
 
     // watch localStorage changes by other tabs

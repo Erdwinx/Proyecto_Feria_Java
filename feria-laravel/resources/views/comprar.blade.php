@@ -14,7 +14,6 @@
         <a href="/eventos">Eventos</a>
         <a href="/noticias">Noticias</a>
         <a href="/promociones">Promociones</a>
-        <a href="/comprar">Comprar</a>
     </nav>
     <div class="profile-wrap" id="profileWrap">
         <button id="profileButton" class="profile-button" type="button" aria-expanded="false" aria-controls="profileDrawer">
@@ -47,14 +46,45 @@
         <h2 class="section-title">Finalizar compra</h2>
         <p class="section-lead">Completa tus datos, selecciona tu categoria y escoge asiento si eliges VIP o grada.</p>
 
-        <div class="checkout-card seat-card">
+        <div class="checkout-card" style="margin-bottom: 1rem;">
+            <div id="eventHeader" style="margin-bottom: 1.5rem;">
+                <h2 id="eventTitle" style="font-size: 2rem; margin: 0 0 0.5rem 0; color: var(--accent);">-</h2>
+                <p id="eventSubtitle" style="margin: 0; color: var(--muted); font-size: 0.95rem;">Elige una fecha para comprar</p>
+            </div>
+            <select id="eventDate" required style="display: none;">
+                <option value="">Selecciona una fecha</option>
+            </select>
+            <div class="date-chip-section">
+                <p class="seat-selection-info" id="availableDatesInfo">Fechas disponibles para este boleto.</p>
+                <div id="eventDatesList" class="date-chip-list"></div>
+            </div>
+            <p class="seat-selection-info" id="dateSelectionInfo">Elige una fecha para ver las categorías y asientos disponibles.</p>
+        </div>
+
+        <div id="fairCard" class="checkout-card hidden" style="margin-bottom: 1rem;">
+            <h3>Boleto de feria</h3>
+            <p id="fairTicketTitle" class="section-lead" style="margin-bottom: 0.5rem;"></p>
+            <div class="form-grid">
+                <div>
+                    <label for="fairQty">Cantidad</label>
+                    <input id="fairQty" type="number" min="1" value="1">
+                </div>
+                <div>
+                    <label>Vigencia</label>
+                    <div class="seat-selection-info">Este boleto expira en 7 días si no finalizas la compra.</div>
+                </div>
+            </div>
+            <button id="fairAddToCart" type="button" class="add-cart-btn">Agregar boleto al carrito</button>
+        </div>
+
+        <div id="seatCard" class="checkout-card seat-card hidden">
             <h3>Seleccion de espacio</h3>
-            <div class="seat-options" id="seatOptions">
+            <div class="seat-options hidden" id="seatOptions">
                 <button class="seat-choice active" type="button" data-seat-category="general">General</button>
                 <button class="seat-choice" type="button" data-seat-category="grada">Grada</button>
                 <button class="seat-choice" type="button" data-seat-category="vip">VIP</button>
             </div>
-            <div class="seat-map" id="seatMapGeneral">
+            <div class="seat-map hidden" id="seatMapGeneral">
                 <p>General no tiene asiento asignado. Compra tu boleto y accede al area general.</p>
             </div>
             <div class="seat-map hidden" id="seatMapGrada">
@@ -116,13 +146,14 @@
                 </div>
                 <p class="seat-note">Los asientos desactivados ya no estan disponibles.</p>
             </div>
-            <p id="seatSelectionInfo" class="seat-selection-info">Categoria activa: General</p>
+            <p id="seatSelectionInfo" class="seat-selection-info">Selecciona una fecha para continuar.</p>
             <div id="seatActionsContainer" class="seat-actions hidden">
                 <button id="addSeatsToCart" type="button" class="add-cart-btn">Agregar al carrito</button>
             </div>
         </div>
 
-        <div class="checkout-grid">
+        <div id="checkoutPanel" class="hidden checkout-drawer">
+        <div class="checkout-grid checkout-drawer-inner">
             <form id="checkoutForm" class="checkout-card">
                 <div class="form-grid">
                     <div>
@@ -136,10 +167,6 @@
                     <div>
                         <label for="buyerPhone">Telefono</label>
                         <input id="buyerPhone" type="tel" maxlength="20" required>
-                    </div>
-                    <div>
-                        <label for="eventDate">Fecha del evento</label>
-                        <input id="eventDate" type="date" required>
                     </div>
                     <div>
                         <label for="paymentMethod">Metodo de pago</label>
@@ -173,6 +200,7 @@
             </form>
 
             <div class="checkout-card">
+                <button id="closeCheckoutBtn" type="button" class="close-checkout-btn">Cerrar carrito</button>
                 <h3>Tu carrito</h3>
                 <div id="cartItems" class="cart-items"></div>
                 <p id="cartEmpty" class="empty-msg">Tu carrito esta vacio.</p>
@@ -183,6 +211,7 @@
                 <button id="confirmBtn" type="button">Confirmar compra</button>
                 <p id="checkoutMessage" class="create-msg"></p>
             </div>
+        </div>
         </div>
     </section>
 </main>
@@ -196,21 +225,193 @@
     const profileButton = document.getElementById("profileButton");
     const logoutBtn = document.getElementById("logoutBtn");
     const checkoutForm = document.getElementById("checkoutForm");
+    const closeCheckoutBtn = document.getElementById("closeCheckoutBtn");
     const confirmBtn = document.getElementById("confirmBtn");
     const checkoutMessage = document.getElementById("checkoutMessage");
     const cartItems = document.getElementById("cartItems");
     const cartEmpty = document.getElementById("cartEmpty");
     const cartTotal = document.getElementById("cartTotal");
+    const dateSelectionInfo = document.getElementById("dateSelectionInfo");
+    const availableDatesInfo = document.getElementById("availableDatesInfo");
+    const eventDatesList = document.getElementById("eventDatesList");
+    const eventTitle = document.getElementById("eventTitle");
+    const eventSubtitle = document.getElementById("eventSubtitle");
 
     const seatOptions = document.getElementById("seatOptions");
     const seatMapGeneral = document.getElementById("seatMapGeneral");
     const seatMapGrada = document.getElementById("seatMapGrada");
     const seatMapVip = document.getElementById("seatMapVip");
     const seatSelectionInfo = document.getElementById("seatSelectionInfo");
+    const checkoutPanel = document.getElementById("checkoutPanel");
+    const seatCard = document.getElementById("seatCard");
+    const fairCard = document.getElementById("fairCard");
+    const fairTicketTitle = document.getElementById("fairTicketTitle");
+    const fairQty = document.getElementById("fairQty");
+    const fairAddToCart = document.getElementById("fairAddToCart");
 
     const buyerName = document.getElementById("buyerName");
     const buyerEmail = document.getElementById("buyerEmail");
     const eventDate = document.getElementById("eventDate");
+
+    const seatCatalog = {
+        grada: [
+            "A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9", "A10", "A11", "A12",
+            "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "B10", "B11", "B12",
+            "C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10", "C11", "C12"
+        ],
+        vip: ["V1", "V2", "V3", "V4", "V5", "V6", "V7", "V8", "V9", "V10", "V11", "V12"],
+        general: []
+    };
+
+    let eventsList = [];
+    let eventsLoaded = false;
+    let eventsLoading = false;
+    let selectedTicketType = 'concierto';
+    let selectedEventKey = null;
+    let currentAvailability = { soldSeats: [], availableSeats: [] };
+    const eventDatePresets = {
+        'concierto-central': ['2026-05-10', '2026-05-14', '2026-05-18'],
+        'ritmo-urbano': ['2026-06-15', '2026-06-21', '2026-06-28'],
+        'electro-fest': ['2026-06-19', '2026-06-23', '2026-06-27'],
+        'noche-de-pop': ['2026-06-17', '2026-06-20', '2026-06-24'],
+        'feria': ['2026-05-11', '2026-05-12', '2026-05-13', '2026-05-17'],
+    };
+
+    function slugify(value) {
+        return String(value || '')
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+    }
+
+    function getPurchaseParams() {
+        const params = new URLSearchParams(window.location.search);
+        return {
+            event: params.get('event'),
+            selectedEvent: params.get('selectedEvent'),
+            ticketType: params.get('ticketType'),
+            ticket: params.get('ticket'),
+        };
+    }
+
+    function applyPurchaseMode() {
+        const params = getPurchaseParams();
+        selectedTicketType = params.ticketType === 'feria' ? 'feria' : 'concierto';
+        selectedEventKey = params.selectedEvent || params.event;
+
+        if (selectedTicketType === 'feria') {
+            seatCard.classList.add('hidden');
+            fairCard.classList.remove('hidden');
+            fairTicketTitle.textContent = params.ticket ? `Boleto ${params.ticket}` : 'Boleto de feria';
+            seatOptions.classList.add('hidden');
+            seatActionsContainer.classList.add('hidden');
+            dateSelectionInfo.textContent = 'Boleto de feria: solo selecciona cantidad y agrégalo al carrito.';
+            return;
+        }
+
+        fairCard.classList.add('hidden');
+        seatCard.classList.remove('hidden');
+    }
+
+    async function loadEvents() {
+        if (eventsLoaded || eventsLoading) {
+            return;
+        }
+
+        eventsLoading = true;
+
+        try {
+            const res = await fetch('/api/events');
+            if (!res.ok) return;
+            const rawEvents = await res.json();
+
+            const params = getPurchaseParams();
+            const selectedKey = params.event || selectedEventKey;
+            const scopedEvents = selectedKey
+                ? rawEvents.filter((ev) => {
+                    const eventKey = ev.event_key || slugify(ev.nombre);
+                    return eventKey === selectedKey || slugify(ev.nombre) === slugify(selectedKey);
+                })
+                : rawEvents;
+
+            const presetDates = selectedKey && eventDatePresets[selectedKey] ? eventDatePresets[selectedKey] : [];
+            const fallbackEvents = presetDates.map((dateValue) => ({
+                id: `${selectedKey || 'event'}-${dateValue}`,
+                event_key: selectedKey || 'event',
+                nombre: selectedKey ? selectedKey.replace(/-/g, ' ') : 'Evento',
+                tipo_evento: selectedTicketType,
+                fecha_evento: dateValue,
+            }));
+
+            const seenDates = new Set();
+            const sourceEvents = scopedEvents.length ? scopedEvents : fallbackEvents;
+            eventsList = sourceEvents.filter((ev) => {
+                if (!ev || !ev.fecha_evento || seenDates.has(ev.fecha_evento)) {
+                    return false;
+                }
+                seenDates.add(ev.fecha_evento);
+                return true;
+            });
+
+            const sel = document.getElementById('eventDate');
+            sel.replaceChildren();
+
+            const placeholder = document.createElement('option');
+            placeholder.value = '';
+            placeholder.textContent = 'Selecciona una fecha';
+            sel.appendChild(placeholder);
+
+            eventsList.forEach(ev => {
+                const opt = document.createElement('option');
+                opt.value = ev.fecha_evento;
+                opt.text = `${ev.fecha_evento} - ${ev.nombre}`;
+                sel.appendChild(opt);
+            });
+
+            renderAvailableDates();
+
+            // Update the event header
+            if (eventTitle && eventsList.length > 0) {
+                const eventName = eventsList[0].nombre || 'Evento';
+                eventTitle.textContent = eventName;
+                eventSubtitle.textContent = 'Elige una fecha para comprar';
+            }
+
+            if (selectedTicketType === 'concierto' && eventsList.length > 0) {
+                sel.value = eventsList[0].fecha_evento;
+                dateSelectionInfo.textContent = `Evento seleccionado: ${eventsList[0].nombre}`;
+            }
+
+            applyPurchaseMode();
+
+            // If we arrived with a selectedEvent, open the seat selection and refresh availability
+            const arrivalKey = selectedEventKey || params.event;
+            if (arrivalKey && eventsList.length > 0) {
+                // ensure UI shows seat selection and loads availability
+                try {
+                    await refreshAvailabilityForCurrentSelection();
+                } catch (e) {
+                    console.warn('Error refreshing availability for selected event', e);
+                }
+                // scroll the seat card into view so user sees the boleto section
+                setTimeout(() => {
+                    seatCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 120);
+            }
+
+            eventsLoaded = true;
+        } catch (e) {
+            console.error('Could not load events', e);
+        } finally {
+            eventsLoading = false;
+        }
+    }
+
+    function setCheckoutPanelVisible(visible) {
+        checkoutPanel.classList.toggle("hidden", !visible);
+    }
 
     function requireToken() {
         const token = localStorage.getItem(tokenKey);
@@ -306,7 +507,11 @@
             row.className = "cart-item";
             row.innerHTML = `
                 <div>
-                    <span>${item.name}</span>
+                    <div style="margin-bottom: 0.25rem;">
+                        <strong>${item.name}</strong>
+                    </div>
+                    ${item.dateEvento ? `<div style="font-size: 0.85rem; color: var(--muted);">📅 ${item.dateEvento}</div>` : ''}
+                    ${item.eventName ? `<div style="font-size: 0.85rem; color: var(--muted);">${item.eventName}</div>` : ''}
                     <span class="cart-qty">x${item.qty}</span>
                 </div>
                 <span>${formatMoney(item.price * item.qty)}</span>
@@ -317,6 +522,102 @@
         cartTotal.textContent = formatMoney(total);
     }
 
+    function renderAvailableDates() {
+        if (!eventDatesList || !availableDatesInfo) {
+            return;
+        }
+
+        const selectedKey = selectedEventKey || getPurchaseParams().event || getPurchaseParams().selectedEvent;
+        const dates = eventsList.map((ev) => ev.fecha_evento).filter(Boolean);
+
+        eventDatesList.innerHTML = '';
+
+        if (!dates.length) {
+            availableDatesInfo.textContent = selectedTicketType === 'feria'
+                ? 'Boleto de feria sin fecha.'
+                : 'No hay fechas disponibles para este evento.';
+            eventDatesList.classList.add('hidden');
+            return;
+        }
+
+        availableDatesInfo.textContent = selectedKey
+            ? `Fechas disponibles para ${selectedKey.replace(/-/g, ' ')}`
+            : 'Fechas disponibles';
+        eventDatesList.classList.remove('hidden');
+
+        dates.forEach((dateValue, index) => {
+            const chip = document.createElement('button');
+            chip.type = 'button';
+            chip.className = 'date-chip';
+            chip.textContent = dateValue;
+            chip.dataset.date = dateValue;
+            if (index === 0) {
+                chip.classList.add('active');
+            }
+
+            chip.addEventListener('click', async () => {
+                eventDate.value = dateValue;
+                document.querySelectorAll('.date-chip').forEach((node) => node.classList.toggle('active', node.dataset.date === dateValue));
+                updateEventTypeUI();
+            });
+
+            eventDatesList.appendChild(chip);
+        });
+    }
+
+    function isConcertDate(dateValue) {
+        return selectedTicketType === 'concierto' && eventsList.some(ev => ev.fecha_evento === dateValue && ev.tipo_evento === 'concierto');
+    }
+
+    function getAllowedCategories(dateValue) {
+        return isConcertDate(dateValue) ? ["grada", "vip"] : ["general", "grada", "vip"];
+    }
+
+    async function loadSeatAvailability(dateValue, category) {
+        if (!dateValue || category === "general") {
+            currentAvailability = { soldSeats: [], availableSeats: [] };
+            return;
+        }
+
+        const token = localStorage.getItem(tokenKey);
+        if (!token) {
+            currentAvailability = { soldSeats: [], availableSeats: [] };
+            return;
+        }
+
+        try {
+            const response = await authFetch(`/api/tickets/available-seats?fechaEvento=${encodeURIComponent(dateValue)}&category=${encodeURIComponent(category)}`);
+            if (!response.ok) {
+                throw new Error("No se pudo cargar la disponibilidad de asientos");
+            }
+
+            currentAvailability = await response.json();
+        } catch (error) {
+            currentAvailability = { soldSeats: [], availableSeats: [] };
+        }
+    }
+
+    function refreshSeatButtons() {
+        const soldSeats = new Set(currentAvailability.soldSeats || []);
+        document.querySelectorAll(".seat-map .seat-btn").forEach(button => {
+            const seatNumber = button.dataset.seatNumber;
+            if (!seatNumber) {
+                return;
+            }
+
+            const isSold = soldSeats.has(seatNumber);
+            button.disabled = isSold;
+            button.classList.toggle("disabled", isSold);
+            button.classList.toggle("sold", isSold);
+            if (isSold) {
+                button.title = "Asiento no disponible";
+                button.classList.remove("selected");
+            } else {
+                button.title = "";
+            }
+        });
+    }
+
     let selectedSeatCategory = "general";
     let selectedSeats = [];
     const seatActionsContainer = document.getElementById("seatActionsContainer");
@@ -325,7 +626,11 @@
     function setSeatCategory(category) {
         selectedSeatCategory = category;
         selectedSeats = [];
-        seatSelectionInfo.textContent = `Categoria activa: ${category.charAt(0).toUpperCase() + category.slice(1)}`;
+        const selectedDate = eventDate.value;
+        const isConcert = isConcertDate(selectedDate);
+        seatSelectionInfo.textContent = isConcert && category !== "general"
+            ? `Concierto: selecciona tus asientos ${category.toUpperCase()} disponibles.`
+            : `Categoria activa: ${category.charAt(0).toUpperCase() + category.slice(1)}`;
         seatMapGeneral.classList.toggle("hidden", category !== "general");
         seatMapGrada.classList.toggle("hidden", category !== "grada");
         seatMapVip.classList.toggle("hidden", category !== "vip");
@@ -339,43 +644,48 @@
     }
 
     function updateSeatSelectionInfo() {
+        const selectedDate = eventDate.value;
+        if (!selectedDate) {
+            seatSelectionInfo.textContent = "Selecciona una fecha para continuar.";
+            seatActionsContainer.classList.add("hidden");
+            addSeatsToCart.disabled = true;
+            return;
+        }
+
         if (selectedSeatCategory === "general") {
             seatSelectionInfo.textContent = "Categoria activa: General (sin asiento asignado)";
             seatActionsContainer.classList.add("hidden");
+            addSeatsToCart.disabled = false;
         } else if (selectedSeats.length > 0) {
             seatSelectionInfo.textContent = `Categoria activa: ${selectedSeatCategory.toUpperCase()} - ${selectedSeats.length} asiento${selectedSeats.length > 1 ? 's' : ''} seleccionado${selectedSeats.length > 1 ? 's' : ''}: ${selectedSeats.join(", ")}`;
             seatActionsContainer.classList.remove("hidden");
+            addSeatsToCart.disabled = false;
         } else {
             seatSelectionInfo.textContent = `Categoria activa: ${selectedSeatCategory.toUpperCase()} - Elige tu asiento`;
             seatActionsContainer.classList.add("hidden");
+            addSeatsToCart.disabled = true;
         }
     }
 
     function initSeatSelection() {
-        console.log("Inicializando selección de asientos...");
-        console.log("seatOptions:", seatOptions);
-        console.log("seatMapGrada:", seatMapGrada);
-        console.log("seatMapVip:", seatMapVip);
-        
         seatOptions.querySelectorAll(".seat-choice").forEach(button => {
-            console.log("Agregando listener a botón:", button.dataset.seatCategory);
-            button.addEventListener("click", () => {
-                console.log("Clic en categoría:", button.dataset.seatCategory);
-                setSeatCategory(button.dataset.seatCategory);
+            button.addEventListener("click", async () => {
+                if (button.disabled) {
+                    return;
+                }
+
+                await setCategoryAndReload(button.dataset.seatCategory);
             });
         });
 
-        // Event delegation para los asientos
         document.querySelectorAll(".seat-map").forEach(seatMap => {
-            console.log("Agregando event delegation a seat-map");
             seatMap.addEventListener("click", (event) => {
                 const button = event.target.closest(".seat-btn");
-                console.log("Clic en:", event.target, "button:", button);
                 if (!button || button.disabled || button.classList.contains("disabled")) return;
 
                 const seatNumber = button.dataset.seatNumber;
                 const index = selectedSeats.indexOf(seatNumber);
-                
+
                 if (index > -1) {
                     selectedSeats.splice(index, 1);
                     button.classList.remove("selected");
@@ -383,43 +693,126 @@
                     selectedSeats.push(seatNumber);
                     button.classList.add("selected");
                 }
-                
+
                 updateSeatSelectionInfo();
             });
         });
 
         addSeatsToCart.addEventListener("click", () => {
             if (selectedSeats.length === 0) return;
-            
-            selectedSeats.forEach(seatNumber => {
-                const item = {
-                    id: `${selectedSeatCategory}-${seatNumber}`,
-                    name: `Boleto ${selectedSeatCategory.toUpperCase()} - Asiento ${seatNumber}`,
-                    price: selectedSeatCategory === "vip" ? 250 : (selectedSeatCategory === "grada" ? 180 : 100)
-                };
-                addToCart(item, 1);
-            });
-            
+
+            const eventValue = eventDate.value;
+            const eventName = eventsList.find(ev => ev.fecha_evento === eventValue)?.nombre || 'Evento';
+            const item = {
+                id: `${eventValue}-${selectedSeatCategory}-${selectedSeats.join(',')}`,
+                name: selectedSeatCategory === "general"
+                    ? `Boleto GENERAL` 
+                    : `Boleto ${selectedSeatCategory.toUpperCase()} - Asientos ${selectedSeats.join(", ")}`,
+                category: selectedSeatCategory,
+                seatNumbers: selectedSeatCategory === "general" ? [] : selectedSeats.slice(),
+                dateEvento: eventValue,
+                eventName: eventName,
+                price: selectedSeatCategory === "vip" ? 250 * selectedSeats.length : (selectedSeatCategory === "grada" ? 180 * selectedSeats.length : 100 * selectedSeats.length),
+                qty: 1,
+            };
+            addToCart(item, 1);
+
             showMessage(`${selectedSeats.length} asiento${selectedSeats.length > 1 ? 's' : ''} agregado${selectedSeats.length > 1 ? 's' : ''} al carrito`, true);
             selectedSeats = [];
             document.querySelectorAll(".seat-map .seat-btn").forEach(btn => btn.classList.remove("selected"));
             updateSeatSelectionInfo();
         });
 
-        setSeatCategory("general");
+        seatOptions.classList.add("hidden");
+        seatMapGeneral.classList.add("hidden");
+        seatMapGrada.classList.add("hidden");
+        seatMapVip.classList.add("hidden");
+        seatActionsContainer.classList.add("hidden");
+        addSeatsToCart.disabled = true;
+        seatSelectionInfo.textContent = "Selecciona una fecha para continuar.";
+    }
+
+    async function setCategoryAndReload(category) {
+        selectedSeats = [];
+        selectedSeatCategory = category;
+        seatOptions.querySelectorAll(".seat-choice").forEach(btn => {
+            btn.classList.toggle("active", btn.dataset.seatCategory === category);
+        });
+
+        seatMapGeneral.classList.toggle("hidden", category !== "general");
+        seatMapGrada.classList.toggle("hidden", category !== "grada");
+        seatMapVip.classList.toggle("hidden", category !== "vip");
+
+        await refreshAvailabilityForCurrentSelection();
         updateSeatSelectionInfo();
     }
 
-    async function loadProfile() {
-        const response = await authFetch("/api/customers/me");
-        if (!response.ok) {
+    async function refreshAvailabilityForCurrentSelection() {
+        const selectedDate = eventDate.value;
+        if (!selectedDate) {
+            seatOptions.classList.add("hidden");
+            seatSelectionInfo.textContent = "Selecciona una fecha para continuar.";
             return;
         }
-        const data = await response.json();
-        buyerName.value = data.nombre || "";
-        buyerEmail.value = data.email || "";
-        profileName.textContent = data.nombre || "-";
-        profileEmail.textContent = data.email || "-";
+
+        document.querySelectorAll('.date-chip').forEach((node) => {
+            node.classList.toggle('active', node.dataset.date === selectedDate);
+        });
+
+        const isConcert = isConcertDate(selectedDate);
+        seatOptions.classList.remove("hidden");
+
+        const allowedCategories = getAllowedCategories(selectedDate);
+        seatOptions.querySelectorAll(".seat-choice").forEach(button => {
+            const isAllowed = allowedCategories.includes(button.dataset.seatCategory);
+            button.disabled = !isAllowed;
+            button.classList.toggle("hidden", !isAllowed);
+        });
+
+        const nextCategory = allowedCategories.includes(selectedSeatCategory)
+            ? selectedSeatCategory
+            : (allowedCategories[0] ?? "general");
+        if (nextCategory !== selectedSeatCategory) {
+            selectedSeatCategory = nextCategory;
+        }
+
+        if (selectedSeatCategory === "general") {
+            seatMapGeneral.classList.remove("hidden");
+            seatMapGrada.classList.add("hidden");
+            seatMapVip.classList.add("hidden");
+            currentAvailability = { soldSeats: [], availableSeats: [] };
+            refreshSeatButtons();
+            return;
+        }
+
+        await loadSeatAvailability(selectedDate, selectedSeatCategory);
+        refreshSeatButtons();
+
+        seatMapGeneral.classList.toggle("hidden", selectedSeatCategory !== "general");
+        seatMapGrada.classList.toggle("hidden", selectedSeatCategory !== "grada");
+        seatMapVip.classList.toggle("hidden", selectedSeatCategory !== "vip");
+    }
+
+    async function loadProfile() {
+        const token = localStorage.getItem(tokenKey);
+        if (!token) {
+            return;
+        }
+
+        try {
+            const response = await authFetch("/api/customers/me");
+            if (!response.ok) {
+                return;
+            }
+            const data = await response.json();
+            buyerName.value = data.nombre || "";
+            buyerEmail.value = data.email || "";
+            profileName.textContent = data.nombre || "-";
+            profileEmail.textContent = data.email || "-";
+        } catch (error) {
+            // Leave the purchase UI usable even if profile data is unavailable.
+            return;
+        }
     }
 
     function getSeatSuffix() {
@@ -467,6 +860,12 @@
         window.location.href = "/login";
     });
 
+    if (closeCheckoutBtn) {
+        closeCheckoutBtn.addEventListener('click', () => {
+            checkoutPanel.classList.add('hidden');
+        });
+    }
+
     confirmBtn.addEventListener("click", async () => {
         const items = readCart();
         if (items.length === 0) {
@@ -475,10 +874,29 @@
         }
 
         const nombre = buyerName.value.trim();
-        const fecha = eventDate.value;
+        const fecha = selectedTicketType === 'feria'
+            ? new Date().toISOString().slice(0, 10)
+            : eventDate.value;
 
-        if (!nombre || !fecha) {
-            setMessage(checkoutMessage, false, "Completa nombre y fecha");
+        if (!nombre) {
+            setMessage(checkoutMessage, false, "Completa tu nombre");
+            return;
+        }
+
+        if (selectedTicketType !== 'feria' && !fecha) {
+            setMessage(checkoutMessage, false, "Selecciona una fecha");
+            return;
+        }
+
+        // Validar campos de pago
+        const cardNumber = document.getElementById("cardNumber").value.trim();
+        const cardExpiry = document.getElementById("cardExpiry").value.trim();
+        const cardCvv = document.getElementById("cardCvv").value.trim();
+        const billingAddress = document.getElementById("billingAddress").value.trim();
+        const billingCity = document.getElementById("billingCity").value.trim();
+
+        if (!cardNumber || !cardExpiry || !cardCvv || !billingAddress || !billingCity) {
+            setMessage(checkoutMessage, false, "Completa todos los datos de pago y facturacion");
             return;
         }
 
@@ -515,12 +933,81 @@
         }
     }
 
-    function init() {
-        requireToken();
+    function updateEventTypeUI() {
+        if (selectedTicketType === 'feria') {
+            seatCard.classList.add("hidden");
+            fairCard.classList.remove("hidden");
+            dateSelectionInfo.textContent = "Boleto de feria: solo selecciona cantidad y agrégalo al carrito.";
+            return;
+        }
+
+        const selectedDate = eventDate.value;
+        const isConcert = isConcertDate(selectedDate);
+
+        dateSelectionInfo.textContent = selectedDate
+            ? (isConcert ? "Fecha de concierto seleccionada. Puedes elegir Grada o VIP." : "Fecha de feria seleccionada. Puedes elegir General, Grada o VIP.")
+            : "Elige una fecha para ver las categorías y asientos disponibles.";
+
+        if (!selectedDate) {
+            seatCard.classList.add("hidden");
+            seatOptions.classList.add("hidden");
+            seatMapGeneral.classList.add("hidden");
+            seatMapGrada.classList.add("hidden");
+            seatMapVip.classList.add("hidden");
+            seatActionsContainer.classList.add("hidden");
+            addSeatsToCart.disabled = true;
+            seatSelectionInfo.textContent = "Selecciona una fecha para continuar.";
+            return;
+        }
+
+        seatCard.classList.remove("hidden");
+        seatOptions.classList.remove("hidden");
+
+        if (isConcert) {
+            seatOptions.querySelectorAll(".seat-choice").forEach(btn => {
+                btn.disabled = !['grada', 'vip'].includes(btn.dataset.seatCategory);
+            });
+            setCategoryAndReload(selectedSeatCategory === 'grada' || selectedSeatCategory === 'vip' ? selectedSeatCategory : 'grada');
+        } else {
+            seatOptions.querySelectorAll(".seat-choice").forEach(btn => {
+                btn.disabled = false;
+                btn.classList.remove("hidden");
+            });
+            setCategoryAndReload('general');
+        }
+    }
+
+    eventDate.addEventListener('change', updateEventTypeUI);
+
+    if (fairAddToCart) {
+        fairAddToCart.addEventListener('click', () => {
+            const qty = Math.max(1, parseInt(fairQty.value, 10) || 1);
+            const ticketName = fairTicketTitle.textContent || 'Boleto de feria';
+            const selectedDate = eventDate.value || (eventsList[0]?.fecha_evento || '');
+            const eventName = eventsList.find(ev => ev.fecha_evento === selectedDate)?.nombre || 'Feria Local';
+            addToCart({
+                id: `fair-${slugify(ticketName)}`,
+                name: ticketName,
+                price: 100,
+                category: 'general',
+                seatNumbers: [],
+                dateEvento: selectedDate,
+                eventName: eventName,
+                qty: 1
+            }, qty);
+            showMessage(`${qty} boleto${qty > 1 ? 's' : ''} de feria agregado${qty > 1 ? 's' : ''} al carrito`, true);
+        });
+    }
+
+    async function init() {
+        setCheckoutPanelVisible(false);
+        applyPurchaseMode();
+        await loadEvents();
         loadProfile();
         initSeatSelection();
         updateCartDisplay();
         initEventFromUrl();
+        updateEventTypeUI(); // Inicializar estado del evento
     }
 
     init();

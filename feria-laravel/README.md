@@ -75,6 +75,35 @@ Variables relevantes en `.env`:
 - `APP_JWT_SECRET`: secreto para firmar tokens.
 - `APP_JWT_TTL_MINUTES`: tiempo de vida del token en minutos.
 
+## QR por Paquete (Conciertos)
+
+### Concepto
+
+Los conciertos funcionan con **paquetes de boletos**. Un único QR representa el paquete completo.
+
+**Nota**: Si compras varios boletos, entrarán como un paquete.
+
+### Flujo
+
+1. **Al comprar**: El cliente selecciona "Concierto" y una fecha predefinida. Se asignan todos los boletos del paquete automáticamente.
+2. **Obtener QR**: El endpoint `/api/tickets/{id}/current-qr` devuelve el QR del paquete (no individual).
+3. **Validar escaneo**: Escanear el QR del paquete marca **todos los boletos del paquete** como escaneados simultáneamente.
+4. **Vista de boleto**: Muestra información de todos los boletos incluidos en el paquete.
+
+### Formato de QR
+
+- **Concierto (Paquete)**: `FERIAQR|PKG|{packageId}|{encodedName}|{issuedAt}|{nonce}|{signature}`
+- **Feria (Individual)**: `FERIAQR|{ticketId}|{encodedName}|{issuedAt}|{nonce}|{signature}`
+
+### Recuperación
+
+Si un paquete fue escaneado por error, se recuperan todos los boletos del paquete simultáneamente.
+
+## Usuario de prueba
+
+- Correo: `test@feriapass.local`
+- Contraseña: `secret123`
+
 ## Pruebas
 
 ```bash

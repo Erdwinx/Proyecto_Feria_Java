@@ -14,7 +14,6 @@
         <a href="/eventos">Eventos</a>
         <a href="/noticias">Noticias</a>
         <a href="/promociones">Promociones</a>
-        <a href="/comprar">Comprar</a>
     </nav>
     <div class="profile-wrap" id="profileWrap">
         <button id="profileButton" class="profile-button" type="button" aria-expanded="false" aria-controls="profileDrawer">

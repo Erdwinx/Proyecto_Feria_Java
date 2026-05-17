@@ -10,7 +10,7 @@
 <body class="scanner-page">
 <main class="layout">
     <nav class="nav">
-        <a href="/boletos">Boletos</a>
+        <a href="/panel">Panel</a>
         <a class="active" href="/scanner">Escaner</a>
     </nav>
 

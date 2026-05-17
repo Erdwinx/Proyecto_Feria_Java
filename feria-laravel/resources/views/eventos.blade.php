@@ -14,7 +14,6 @@
         <a href="/eventos">Eventos</a>
         <a href="/noticias">Noticias</a>
         <a href="/promociones">Promociones</a>
-        <a href="/comprar">Comprar</a>
     </nav>
     <div class="profile-wrap" id="profileWrap">
         <button id="profileButton" class="profile-button" type="button" aria-expanded="false" aria-controls="profileDrawer">
@@ -63,8 +62,8 @@
                         <p>Un set lleno de luces, videos y temas exclusivos para cerrar la noche.</p>
                     </div>
                     <div class="event-detail-box">
-                        <strong>Fechas y horario</strong>
-                        <p>Duracion: 90 min<br>Horario: 20:00 - 21:30<br>Zonas disponibles: General, VIP</p>
+                        <strong>Fecha, horario y zona</strong>
+                        <p>Fechas:<br>10/05/2026<br>14/05/2026<br>18/05/2026<br>Horario: 20:00 - 21:30<br>Zona: Escenario central</p>
                     </div>
                     <div class="event-detail-box">
                         <strong>Artistas</strong>
@@ -72,7 +71,7 @@
                     </div>
                 </div>
                 <div class="event-footer full-width">
-                    <a href="/comprar?event=concierto-central">Ver boleto</a>
+                    <a href="/comprar?ticketType=concierto&event=concierto-central&selectedEvent=concierto-central">Ver boleto</a>
                 </div>
             </article>
             <article class="event-card cover">
@@ -91,8 +90,8 @@
                         <p>Una experiencia urbana con beats, rimas y buena energia.</p>
                     </div>
                     <div class="event-detail-box">
-                        <strong>Fechas y horario</strong>
-                        <p>Duracion: 75 min<br>Horario: 18:30 - 19:45<br>Zonas disponibles: General, Grada</p>
+                        <strong>Fecha, horario y zona</strong>
+                        <p>Fechas:<br>15/06/2026<br>21/06/2026<br>28/06/2026<br>Horario: 18:30 - 19:45<br>Zona: Escenario urbano</p>
                     </div>
                     <div class="event-detail-box">
                         <strong>Artistas</strong>
@@ -100,7 +99,7 @@
                     </div>
                 </div>
                 <div class="event-footer full-width">
-                    <a href="/comprar?event=ritmo-urbano">Ver boleto</a>
+                    <a href="/comprar?ticketType=concierto&event=ritmo-urbano&selectedEvent=ritmo-urbano">Ver boleto</a>
                 </div>
             </article>
             <article class="event-card cover">
@@ -119,8 +118,8 @@
                         <p>Un show con loops, visuales y energia electronica por Luma Beats.</p>
                     </div>
                     <div class="event-detail-box">
-                        <strong>Fechas y horario</strong>
-                        <p>Duracion: 80 min<br>Horario: 22:00 - 23:20<br>Zonas disponibles: General, VIP</p>
+                        <strong>Fecha, horario y zona</strong>
+                        <p>Fechas:<br>19/06/2026<br>23/06/2026<br>27/06/2026<br>Horario: 22:00 - 23:20<br>Zona: Escenario nocturno</p>
                     </div>
                     <div class="event-detail-box">
                         <strong>Artistas</strong>
@@ -128,7 +127,7 @@
                     </div>
                 </div>
                 <div class="event-footer full-width">
-                    <a href="/comprar?event=electro-fest">Ver boleto</a>
+                    <a href="/comprar?ticketType=concierto&event=electro-fest&selectedEvent=electro-fest">Ver boleto</a>
                 </div>
             </article>
         </div>

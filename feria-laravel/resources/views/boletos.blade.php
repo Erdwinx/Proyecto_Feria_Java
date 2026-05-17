@@ -10,33 +10,34 @@
 <body>
 <main class="layout">
     <nav class="nav">
-        <a class="active" href="/boletos">Boletos</a>
+        <a class="active" href="/panel">Panel</a>
         <a href="/scanner">Escaner</a>
     </nav>
 
     <section class="card">
         <h1>Panel de boletos</h1>
-        <p>Crea boletos y revisa el registro de escaneos.</p>
+        <p>Revisa el registro de escaneos y métricas del panel.</p>
+        <div class="panel-stats">
+            <div class="stat">
+                <strong>Recaudación (CLP):</strong>
+                <span class="stat-value">{{ '$ ' . number_format($totalRevenue ?? 0, 0, ',', '.') }}</span>
+            </div>
+            <div class="stat">
+                <strong>Total boletos:</strong>
+                <span class="stat-value">{{ $totalTickets ?? 0 }}</span>
+            </div>
+            <div class="stat">
+                <strong>Clientes:</strong>
+                <span class="stat-value">{{ $totalCustomers ?? 0 }}</span>
+            </div>
+        </div>
+        <p id="selectedEventNotice" class="scan-msg" style="margin-top: 6px;"></p>
 
         <div class="tab-menu">
-            <button id="tabCreate" type="button" class="tab-btn active">Crear boleto</button>
-            <button id="tabRegister" type="button" class="tab-btn">Registro</button>
+            <button id="tabRegister" type="button" class="tab-btn active">Registro</button>
         </div>
 
-        <div id="panelCreate" class="tab-panel">
-            <form id="createTicketForm" class="create-form">
-                <label for="nombreInput">Nombre</label>
-                <input id="nombreInput" type="text" maxlength="80" placeholder="Nombre del visitante" required>
-
-                <label for="fechaInput">Fecha del evento</label>
-                <input id="fechaInput" type="date" required>
-
-                <button type="submit">Crear boleto</button>
-            </form>
-            <p id="createMessage" class="create-msg"></p>
-        </div>
-
-        <div id="panelRegister" class="tab-panel hidden">
+        <div id="panelRegister" class="tab-panel">
             <div class="register-actions">
                 <button id="recoverBtn" type="button">Recuperar boleto</button>
                 <p class="scan-msg">Clave requerida: RECUPERAR-2026</p>
@@ -92,16 +93,9 @@
     </div>
 </div>
 
-<script>
-    const tabCreate = document.getElementById("tabCreate");
+    <script>
     const tabRegister = document.getElementById("tabRegister");
-    const panelCreate = document.getElementById("panelCreate");
     const panelRegister = document.getElementById("panelRegister");
-
-    const createTicketForm = document.getElementById("createTicketForm");
-    const nombreInput = document.getElementById("nombreInput");
-    const fechaInput = document.getElementById("fechaInput");
-    const createMessage = document.getElementById("createMessage");
 
     const ticketModal = document.getElementById("ticketModal");
     const closeModalBtn = document.getElementById("closeModalBtn");
@@ -118,6 +112,7 @@
     const scanTableBody = document.getElementById("scanTableBody");
     const scanEmpty = document.getElementById("scanEmpty");
     const recoverBtn = document.getElementById("recoverBtn");
+    const selectedEventNotice = document.getElementById("selectedEventNotice");
 
     let currentTicketId = "";
     let expiresAtMs = 0;
@@ -126,23 +121,12 @@
     let scanPollTimer = null;
 
     function switchTab(tab) {
-        const showCreate = tab === "create";
         const showRegister = tab === "register";
-
-        panelCreate.classList.toggle("hidden", !showCreate);
         panelRegister.classList.toggle("hidden", !showRegister);
-
-        tabCreate.classList.toggle("active", showCreate);
         tabRegister.classList.toggle("active", showRegister);
-
         if (showRegister) {
             loadScanLog();
         }
-    }
-
-    function setCreateMessage(ok, text) {
-        createMessage.textContent = text;
-        createMessage.className = ok ? "create-msg ok" : "create-msg error";
     }
 
     function resetScanCheck() {
@@ -391,36 +375,6 @@
         startScanPolling();
     }
 
-    createTicketForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-
-        const nombre = nombreInput.value.trim();
-        const fechaEvento = fechaInput.value;
-        if (!nombre || !fechaEvento) {
-            setCreateMessage(false, "Completa nombre y fecha");
-            return;
-        }
-
-        const response = await fetch("/api/tickets", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ nombre, fechaEvento })
-        });
-
-        if (!response.ok) {
-            setCreateMessage(false, "No se pudo crear el boleto");
-            return;
-        }
-
-        const createdTicket = await response.json();
-        setCreateMessage(true, "Boleto creado con exito");
-        createTicketForm.reset();
-        fechaInput.value = new Date().toISOString().split("T")[0];
-        openTicket(createdTicket);
-    });
-
     generateQrBtn.addEventListener("click", async () => {
         if (!currentTicketId) {
             return;
@@ -466,13 +420,17 @@
         }
     });
 
-    tabCreate.addEventListener("click", () => switchTab("create"));
     tabRegister.addEventListener("click", () => switchTab("register"));
     recoverBtn.addEventListener("click", recoverTicket);
 
     function init() {
         const today = new Date().toISOString().split("T")[0];
-        fechaInput.value = today;
+
+        const params = new URLSearchParams(window.location.search);
+        const selectedEvent = params.get("selectedEvent") || params.get("event");
+        if (selectedEvent) {
+            selectedEventNotice.textContent = `Evento seleccionado: ${selectedEvent.replace(/-/g, " ")}`;
+        }
     }
 
     init();

@@ -19,4 +19,12 @@ class Customer extends Model
     protected $hidden = [
         'password_hash',
     ];
+
+    /**
+     * Relación: Un cliente tiene muchos boletos
+     */
+    public function tickets()
+    {
+        return $this->hasMany(Ticket::class, 'customer_id', 'id');
+    }
 }

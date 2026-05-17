@@ -14,7 +14,6 @@
         <a href="/eventos">Eventos</a>
         <a href="/noticias">Noticias</a>
         <a href="/promociones">Promociones</a>
-        <a href="/comprar">Comprar</a>
     </nav>
     <div class="profile-wrap" id="profileWrap">
         <button id="profileButton" class="profile-button" type="button" aria-expanded="false" aria-controls="profileDrawer">
@@ -45,49 +44,19 @@
 <main class="layout wide">
     <section class="section-band">
         <h2 class="section-title">Promociones</h2>
-        <p class="section-lead">Elige tu boleto, define la cantidad y agregalo al carrito.</p>
+        <p class="section-lead">Elige tu boleto general de feria, define la cantidad y agregalo al carrito.</p>
         <div class="promo-grid">
-            <article class="promo-card" data-id="infantil" data-name="Boleto infantil" data-price="50">
-                <div class="promo-top">
-                    <span class="promo-tag">Acceso especial</span>
-                    <span class="promo-price">$50 MXN</span>
-                </div>
-                <h3>Boleto infantil</h3>
-                <p>Para ninos de 4 a 12 anos. Acceso a zonas familiares.</p>
-                <div class="promo-actions">
-                    <div class="qty-field">
-                        <label class="qty-label" for="qty-infantil">Cantidad</label>
-                        <input id="qty-infantil" class="qty-input" type="number" min="1" value="1">
-                    </div>
-                    <button class="add-cart-btn" type="button" data-add>Agregar al carrito</button>
-                </div>
-            </article>
-            <article class="promo-card" data-id="adulto" data-name="Boleto adulto" data-price="100">
+            <article class="promo-card" data-id="feria-general" data-name="Boleto general de feria" data-price="100">
                 <div class="promo-top">
                     <span class="promo-tag">Entrada general</span>
                     <span class="promo-price">$100 MXN</span>
                 </div>
-                <h3>Boleto adulto</h3>
-                <p>Acceso completo a conciertos, gastronomia y zonas interactivas.</p>
+                <h3>Boleto general de feria</h3>
+                <p>Acceso a todas las zonas generales de la feria. Este boleto expira en 7 dias si no finalizas la compra.</p>
                 <div class="promo-actions">
                     <div class="qty-field">
-                        <label class="qty-label" for="qty-adulto">Cantidad</label>
-                        <input id="qty-adulto" class="qty-input" type="number" min="1" value="1">
-                    </div>
-                    <button class="add-cart-btn" type="button" data-add>Agregar al carrito</button>
-                </div>
-            </article>
-            <article class="promo-card" data-id="premium" data-name="Boleto premium" data-price="180">
-                <div class="promo-top">
-                    <span class="promo-tag">Experiencia VIP</span>
-                    <span class="promo-price">$180 MXN</span>
-                </div>
-                <h3>Boleto premium</h3>
-                <p>Incluye acceso preferente y area lounge durante el evento.</p>
-                <div class="promo-actions">
-                    <div class="qty-field">
-                        <label class="qty-label" for="qty-premium">Cantidad</label>
-                        <input id="qty-premium" class="qty-input" type="number" min="1" value="1">
+                        <label class="qty-label" for="qty-feria-general">Cantidad</label>
+                        <input id="qty-feria-general" class="qty-input" type="number" min="1" value="1">
                     </div>
                     <button class="add-cart-btn" type="button" data-add>Agregar al carrito</button>
                 </div>
@@ -97,95 +66,115 @@
         <section class="section-band alt">
             <h2 class="section-title">Boletos de concierto</h2>
             <p class="section-lead">Selecciona tu concierto y verás el boleto destacado en promociones.</p>
-            <div class="promo-event-grid" id="eventTicketGrid">
-                <article class="promo-event-card" data-event-key="concierto-central" data-event-name="Concierto central" data-event-price="220">
-                    <div class="promo-event-image" style="background-image: linear-gradient(135deg, rgba(27, 146, 224, 0.85), rgba(74, 58, 204, 0.85)), url('/images/concierto1.jpg');"></div>
-                    <div class="promo-event-body">
-                        <span class="promo-event-tag">Concierto</span>
-                        <h3 class="promo-event-title">Concierto central</h3>
-                        <p class="promo-event-description">Ana Vega y banda en vivo. Duracion 90 min. Escenario central.</p>
+            <div class="promo-carousel" data-carousel>
+                <button class="carousel-arrow carousel-prev" type="button" data-carousel-prev aria-label="Concierto anterior">
+                    <span aria-hidden="true">‹</span>
+                </button>
+                <div class="promo-carousel-viewport">
+                    <div class="promo-event-grid promo-carousel-track" id="eventTicketGrid">
+                        <article class="promo-event-card" data-event-key="concierto-central" data-event-name="Concierto central" data-event-price="220">
+                            <div class="promo-event-image" style="background-image: linear-gradient(135deg, rgba(27, 146, 224, 0.85), rgba(74, 58, 204, 0.85)), url('/images/concierto1.jpg');"></div>
+                            <div class="promo-event-body">
+                                <span class="promo-event-tag">Concierto</span>
+                                <h3 class="promo-event-title">Concierto central</h3>
+                                <p class="promo-event-description">Ana Vega y banda en vivo. Duracion 90 min. Escenario central.</p>
+                            </div>
+                            <div class="promo-event-footer">
+                                <button class="event-select-btn" type="button" data-select-event="concierto-central">Seleccionar boleto</button>
+                            </div>
+                        </article>
+                        <article class="promo-event-card" data-event-key="ritmo-urbano" data-event-name="Ritmo Urbano" data-event-price="180">
+                            <div class="promo-event-image" style="background-image: linear-gradient(135deg, rgba(145, 52, 199, 0.85), rgba(59, 130, 246, 0.85)), url('/images/concierto2.jpg');"></div>
+                            <div class="promo-event-body">
+                                <span class="promo-event-tag">Concierto</span>
+                                <h3 class="promo-event-title">Ritmo Urbano</h3>
+                                <p class="promo-event-description">Kira Flow y DJ Boldo en un set urbano con acceso VIP en primera fila.</p>
+                            </div>
+                            <div class="promo-event-footer">
+                                <button class="event-select-btn" type="button" data-select-event="ritmo-urbano">Seleccionar boleto</button>
+                            </div>
+                        </article>
+                        <article class="promo-event-card" data-event-key="electro-fest" data-event-name="Electro Fest" data-event-price="200">
+                            <div class="promo-event-image" style="background-image: linear-gradient(135deg, rgba(22, 163, 74, 0.85), rgba(16, 185, 129, 0.85)), url('/images/concierto3.jpg');"></div>
+                            <div class="promo-event-body">
+                                <span class="promo-event-tag">Concierto</span>
+                                <h3 class="promo-event-title">Electro Fest</h3>
+                                <p class="promo-event-description">Luma Beats en un show nocturno con DJ set y efectos visuales.</p>
+                            </div>
+                            <div class="promo-event-footer">
+                                <button class="event-select-btn" type="button" data-select-event="electro-fest">Seleccionar boleto</button>
+                            </div>
+                        </article>
                     </div>
-                    <div class="promo-event-footer">
-                        <button class="event-select-btn" type="button" data-select-event="concierto-central">Seleccionar boleto</button>
-                    </div>
-                </article>
-                <article class="promo-event-card" data-event-key="ritmo-urbano" data-event-name="Ritmo Urbano" data-event-price="180">
-                    <div class="promo-event-image" style="background-image: linear-gradient(135deg, rgba(145, 52, 199, 0.85), rgba(59, 130, 246, 0.85)), url('/images/concierto2.jpg');"></div>
-                    <div class="promo-event-body">
-                        <span class="promo-event-tag">Concierto</span>
-                        <h3 class="promo-event-title">Ritmo Urbano</h3>
-                        <p class="promo-event-description">Kira Flow y DJ Boldo en un set urbano con acceso VIP en primera fila.</p>
-                    </div>
-                    <div class="promo-event-footer">
-                        <button class="event-select-btn" type="button" data-select-event="ritmo-urbano">Seleccionar boleto</button>
-                    </div>
-                </article>
-                <article class="promo-event-card" data-event-key="electro-fest" data-event-name="Electro Fest" data-event-price="200">
-                    <div class="promo-event-image" style="background-image: linear-gradient(135deg, rgba(22, 163, 74, 0.85), rgba(16, 185, 129, 0.85)), url('/images/concierto3.jpg');"></div>
-                    <div class="promo-event-body">
-                        <span class="promo-event-tag">Concierto</span>
-                        <h3 class="promo-event-title">Electro Fest</h3>
-                        <p class="promo-event-description">Luma Beats en un show nocturno con DJ set y efectos visuales.</p>
-                    </div>
-                    <div class="promo-event-footer">
-                        <button class="event-select-btn" type="button" data-select-event="electro-fest">Seleccionar boleto</button>
-                    </div>
-                </article>
+                </div>
+                <button class="carousel-arrow carousel-next" type="button" data-carousel-next aria-label="Siguiente concierto">
+                    <span aria-hidden="true">›</span>
+                </button>
             </div>
         </section>
 
         <section class="section-band alt">
             <h2 class="section-title">Conciertos destacados</h2>
             <p class="section-lead">Eventos musicales con artista, duracion y acceso directo al boleto.</p>
-            <div class="promo-event-grid">
-                <article class="promo-event-card">
-                    <div class="promo-event-image" style="background-image: linear-gradient(135deg, rgba(27, 146, 224, 0.85), rgba(74, 58, 204, 0.85)), url('/images/concierto1.jpg');"></div>
-                    <div class="promo-event-body">
-                        <span class="promo-event-tag">Concierto</span>
-                        <h3 class="promo-event-title">Noche de Pop</h3>
-                        <p class="promo-event-description">Cantante: Ana Vega · Duracion: 90 min · Lugar: Escenario central.</p>
-                        <div class="promo-event-list">
-                            <span>Artista invitado: DJ Boldo</span>
-                            <span>Horario estimado: 20:00 - 21:30</span>
-                            <span>Ambiente: luces, video y animacion</span>
-                        </div>
+            <div class="promo-carousel" data-carousel>
+                <button class="carousel-arrow carousel-prev" type="button" data-carousel-prev aria-label="Concierto anterior">
+                    <span aria-hidden="true">‹</span>
+                </button>
+                <div class="promo-carousel-viewport">
+                    <div class="promo-event-grid promo-carousel-track">
+                        <article class="promo-event-card">
+                            <div class="promo-event-image" style="background-image: linear-gradient(135deg, rgba(27, 146, 224, 0.85), rgba(74, 58, 204, 0.85)), url('/images/concierto1.jpg');"></div>
+                            <div class="promo-event-body">
+                                <span class="promo-event-tag">Concierto</span>
+                                <h3 class="promo-event-title">Noche de Pop</h3>
+                                <p class="promo-event-description">Cantante: Ana Vega · Fechas: 17/06, 20/06 y 24/06 · Lugar: Escenario central.</p>
+                                <div class="promo-event-list">
+                                    <span>Artista invitado: DJ Boldo</span>
+                                    <span>Horario estimado: 20:00 - 21:30</span>
+                                    <span>Ambiente: luces, video y animacion</span>
+                                </div>
+                            </div>
+                            <div class="promo-event-footer">
+                                <a href="/comprar?ticketType=concierto&event=noche-de-pop">Ver boleto</a>
+                            </div>
+                        </article>
+                        <article class="promo-event-card">
+                            <div class="promo-event-image" style="background-image: linear-gradient(135deg, rgba(145, 52, 199, 0.85), rgba(59, 130, 246, 0.85)), url('/images/concierto2.jpg');"></div>
+                            <div class="promo-event-body">
+                                <span class="promo-event-tag">Concierto</span>
+                                <h3 class="promo-event-title">Ritmo Urbano</h3>
+                                <p class="promo-event-description">Cantante: Kira Flow · Fechas: 15/06, 21/06 y 28/06 · Lugar: Escenario oeste.</p>
+                                <div class="promo-event-list">
+                                    <span>Estilo: urbano / rap</span>
+                                    <span>Horario estimado: 18:30 - 19:45</span>
+                                    <span>Acceso VIP: zona frontal</span>
+                                </div>
+                            </div>
+                            <div class="promo-event-footer">
+                                <a href="/comprar?ticketType=concierto&event=ritmo-urbano">Ver boleto</a>
+                            </div>
+                        </article>
+                        <article class="promo-event-card">
+                            <div class="promo-event-image" style="background-image: linear-gradient(135deg, rgba(22, 163, 74, 0.85), rgba(16, 185, 129, 0.85)), url('/images/concierto3.jpg');"></div>
+                            <div class="promo-event-body">
+                                <span class="promo-event-tag">Concierto</span>
+                                <h3 class="promo-event-title">Electro Fest</h3>
+                                <p class="promo-event-description">Cantante: Luma Beats · Fechas: 19/06, 23/06 y 27/06 · Lugar: Escenario norte.</p>
+                                <div class="promo-event-list">
+                                    <span>Formato: DJ y banda en vivo</span>
+                                    <span>Horario estimado: 22:00 - 23:20</span>
+                                    <span>Entradas con acceso rapido</span>
+                                </div>
+                            </div>
+                            <div class="promo-event-footer">
+                                <a href="/comprar?ticketType=concierto&event=electro-fest">Ver boleto</a>
+                            </div>
+                        </article>
                     </div>
-                    <div class="promo-event-footer">
-                        <a href="/comprar?event=noche-de-pop">Ver boleto</a>
-                    </div>
-                </article>
-                <article class="promo-event-card">
-                    <div class="promo-event-image" style="background-image: linear-gradient(135deg, rgba(145, 52, 199, 0.85), rgba(59, 130, 246, 0.85)), url('/images/concierto2.jpg');"></div>
-                    <div class="promo-event-body">
-                        <span class="promo-event-tag">Concierto</span>
-                        <h3 class="promo-event-title">Ritmo Urbano</h3>
-                        <p class="promo-event-description">Cantante: Kira Flow · Duracion: 75 min · Lugar: Escenario oeste.</p>
-                        <div class="promo-event-list">
-                            <span>Estilo: urbano / rap</span>
-                            <span>Horario estimado: 18:30 - 19:45</span>
-                            <span>Acceso VIP: zona frontal</span>
-                        </div>
-                    </div>
-                    <div class="promo-event-footer">
-                        <a href="/comprar?event=ritmo-urbano">Ver boleto</a>
-                    </div>
-                </article>
-                <article class="promo-event-card">
-                    <div class="promo-event-image" style="background-image: linear-gradient(135deg, rgba(22, 163, 74, 0.85), rgba(16, 185, 129, 0.85)), url('/images/concierto3.jpg');"></div>
-                    <div class="promo-event-body">
-                        <span class="promo-event-tag">Concierto</span>
-                        <h3 class="promo-event-title">Electro Fest</h3>
-                        <p class="promo-event-description">Cantante: Luma Beats · Duracion: 80 min · Lugar: Escenario norte.</p>
-                        <div class="promo-event-list">
-                            <span>Formato: DJ y banda en vivo</span>
-                            <span>Horario estimado: 22:00 - 23:20</span>
-                            <span>Entradas con acceso rapido</span>
-                        </div>
-                    </div>
-                    <div class="promo-event-footer">
-                        <a href="/comprar?event=electro-fest">Ver boleto</a>
-                    </div>
-                </article>
+                </div>
+                <button class="carousel-arrow carousel-next" type="button" data-carousel-next aria-label="Siguiente concierto">
+                    <span aria-hidden="true">›</span>
+                </button>
             </div>
         </section>
 
@@ -278,6 +267,151 @@
         }, 1800);
     }
 
+    function initCarousels() {
+        document.querySelectorAll("[data-carousel]").forEach((carousel) => {
+            const viewport = carousel.querySelector(".promo-carousel-viewport");
+            const track = carousel.querySelector(".promo-carousel-track");
+            const cards = Array.from(carousel.querySelectorAll(".promo-event-card"));
+            const prevButton = carousel.querySelector("[data-carousel-prev]");
+            const nextButton = carousel.querySelector("[data-carousel-next]");
+            if (cards.length <= 1) {
+                prevButton.classList.add("hidden");
+                nextButton.classList.add("hidden");
+                return;
+            }
+
+            const originals = cards.map((card) => card.cloneNode(true));
+            const firstClone = originals[0].cloneNode(true);
+            const lastClone = originals[originals.length - 1].cloneNode(true);
+
+            track.replaceChildren(lastClone, ...originals, firstClone);
+
+            const slides = Array.from(track.children);
+            const totalSlides = slides.length;
+            const realCount = originals.length;
+            let stepPx = 0;
+            let currentIndex = 1;
+            let isAnimating = false;
+
+            // If the page requested a specific event, try to start centered on it
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const selectedEventKey = params.get("selectedEvent");
+                if (selectedEventKey) {
+                    const found = originals.findIndex(o => (o.dataset && o.dataset.eventKey) === selectedEventKey || o.getAttribute("data-event-key") === selectedEventKey);
+                    if (found >= 0) {
+                        currentIndex = found + 1; // account for the leading cloned slide
+                    }
+                }
+            } catch (e) {
+                // ignore
+            }
+
+            function setActiveCard() {
+                slides.forEach((slide, index) => {
+                    slide.classList.toggle("is-active", index === currentIndex);
+                });
+            }
+
+            function updateCarousel(withAnimation = true) {
+                // Robust centering: temporarily remove transform to measure absolute positions,
+                // compute desired delta to center the target slide in the viewport, then apply it.
+                const target = slides[currentIndex];
+                if (!target) return;
+
+                const prevTransition = track.style.transition;
+                const prevTransform = track.style.transform;
+
+                // Turn off transition for measurement
+                track.style.transition = 'none';
+                track.style.transform = 'translateX(0px)';
+
+                // Measure
+                const viewportRect = viewport.getBoundingClientRect();
+                const slideRect = target.getBoundingClientRect();
+                const centerOffset = (viewportRect.width - slideRect.width) / 2;
+
+                // desired left position for the slide
+                const desiredLeft = viewportRect.left + centerOffset;
+                const delta = desiredLeft - slideRect.left;
+
+                // Apply transform. If caller wants animation, restore transition class instead of inline transition
+                if (withAnimation) {
+                    // allow CSS transition to animate
+                    track.style.transition = prevTransition || '';
+                } else {
+                    track.style.transition = 'none';
+                }
+
+                track.style.transform = `translateX(${delta}px)`;
+
+                // Small delay to let layout settle if needed
+                requestAnimationFrame(() => setActiveCard());
+            }
+
+            function goToSlide(nextIndex, withAnimation = true) {
+                if (isAnimating) {
+                    return;
+                }
+
+                isAnimating = true;
+                track.classList.toggle("is-animating", withAnimation);
+                currentIndex = nextIndex;
+                updateCarousel();
+            }
+
+            track.addEventListener("transitionend", () => {
+                if (currentIndex === 0) {
+                    track.classList.remove("is-animating");
+                    currentIndex = realCount;
+                    stepPx = 0;
+                    updateCarousel();
+                } else if (currentIndex === totalSlides - 1) {
+                    track.classList.remove("is-animating");
+                    currentIndex = 1;
+                    stepPx = 0;
+                    updateCarousel();
+                }
+
+                isAnimating = false;
+            });
+
+            window.addEventListener("resize", () => {
+                stepPx = 0;
+                updateCarousel();
+            });
+
+            prevButton.addEventListener("click", () => {
+                goToSlide(currentIndex - 1, true);
+            });
+
+            nextButton.addEventListener("click", () => {
+                goToSlide(currentIndex + 1, true);
+            });
+
+            slides.forEach((slide) => {
+                    slide.querySelectorAll(".event-select-btn").forEach((button) => {
+                    button.addEventListener("click", () => {
+                        const eventKey = button.dataset.selectEvent;
+                        window.location.href = `/comprar?ticketType=concierto&event=${eventKey}&selectedEvent=${eventKey}`;
+                    });
+                });
+            });
+
+            // initial positioning: perform update twice and once in rAF to avoid measurement glitches
+            track.classList.remove('is-animating');
+            updateCarousel();
+            setTimeout(() => {
+                stepPx = 0;
+                updateCarousel();
+            }, 40);
+            requestAnimationFrame(() => {
+                stepPx = 0;
+                updateCarousel();
+            });
+        });
+    }
+
     function addToCart(item, qty) {
         const items = readCart();
         const existing = items.find(entry => entry.id === item.id);
@@ -315,13 +449,6 @@
         });
     });
 
-    document.querySelectorAll(".event-select-btn").forEach(button => {
-        button.addEventListener("click", () => {
-            const eventKey = button.dataset.selectEvent;
-            window.location.href = `/comprar?event=${eventKey}`;
-        });
-    });
-
     function getQueryParam(name) {
         const params = new URLSearchParams(window.location.search);
         return params.get(name);
@@ -337,9 +464,9 @@
             return;
         }
         card.classList.add("selected");
-        card.scrollIntoView({ behavior: "smooth", block: "center" });
     }
 
+    initCarousels();
     highlightSelectedEvent();
 
     profileButton.addEventListener("click", (event) => {
@@ -363,7 +490,7 @@
     });
 
     cartButton.addEventListener("click", () => {
-        window.location.href = "/comprar";
+        window.location.href = "/comprar?ticketType=feria&ticket=general";
     });
 
     function init() {
