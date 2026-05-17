@@ -52,7 +52,7 @@
                     <span class="promo-price">$100 MXN</span>
                 </div>
                 <h3>Boleto general de feria</h3>
-                <p>Acceso a todas las zonas generales de la feria. Este boleto expira en 7 dias si no finalizas la compra.</p>
+                <p>Acceso a todas las zonas generales de la feria. Este boleto tiene una vigencia de 7 días desde su compra.</p>
                 <div class="promo-actions">
                     <div class="qty-field">
                         <label class="qty-label" for="qty-feria-general">Cantidad</label>
@@ -72,7 +72,7 @@
                 </button>
                 <div class="promo-carousel-viewport">
                     <div class="promo-event-grid promo-carousel-track" id="eventTicketGrid">
-                        <article class="promo-event-card" data-event-key="concierto-central" data-event-name="Concierto central" data-event-price="220">
+                        <article class="promo-event-card" id="boleto-concierto-central" data-event-key="concierto-central" data-event-name="Concierto central" data-event-price="220">
                             <div class="promo-event-image" style="background-image: linear-gradient(135deg, rgba(27, 146, 224, 0.85), rgba(74, 58, 204, 0.85)), url('/images/concierto1.jpg');"></div>
                             <div class="promo-event-body">
                                 <span class="promo-event-tag">Concierto</span>
@@ -83,7 +83,7 @@
                                 <button class="event-select-btn" type="button" data-select-event="concierto-central">Seleccionar boleto</button>
                             </div>
                         </article>
-                        <article class="promo-event-card" data-event-key="ritmo-urbano" data-event-name="Ritmo Urbano" data-event-price="180">
+                        <article class="promo-event-card" id="boleto-ritmo-urbano" data-event-key="ritmo-urbano" data-event-name="Ritmo Urbano" data-event-price="180">
                             <div class="promo-event-image" style="background-image: linear-gradient(135deg, rgba(145, 52, 199, 0.85), rgba(59, 130, 246, 0.85)), url('/images/concierto2.jpg');"></div>
                             <div class="promo-event-body">
                                 <span class="promo-event-tag">Concierto</span>
@@ -94,7 +94,7 @@
                                 <button class="event-select-btn" type="button" data-select-event="ritmo-urbano">Seleccionar boleto</button>
                             </div>
                         </article>
-                        <article class="promo-event-card" data-event-key="electro-fest" data-event-name="Electro Fest" data-event-price="200">
+                        <article class="promo-event-card" id="boleto-electro-fest" data-event-key="electro-fest" data-event-name="Electro Fest" data-event-price="200">
                             <div class="promo-event-image" style="background-image: linear-gradient(135deg, rgba(22, 163, 74, 0.85), rgba(16, 185, 129, 0.85)), url('/images/concierto3.jpg');"></div>
                             <div class="promo-event-body">
                                 <span class="promo-event-tag">Concierto</span>
@@ -497,6 +497,25 @@
         requireToken();
         updateCartCount();
         loadProfile();
+        highlightTicketFromHash();
+    }
+
+    function highlightTicketFromHash() {
+        const hash = window.location.hash;
+        if (hash && hash.startsWith("#boleto-")) {
+            const ticketCard = document.querySelector(hash);
+            if (ticketCard) {
+                ticketCard.scrollIntoView({ behavior: "smooth", block: "center" });
+                ticketCard.style.borderColor = "#7fbbff";
+                ticketCard.style.borderWidth = "3px";
+                ticketCard.style.boxShadow = "0 0 20px rgba(127, 187, 255, 0.5)";
+                setTimeout(() => {
+                    ticketCard.style.borderColor = "";
+                    ticketCard.style.borderWidth = "";
+                    ticketCard.style.boxShadow = "";
+                }, 3000);
+            }
+        }
     }
 
     init();

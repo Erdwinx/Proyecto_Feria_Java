@@ -231,7 +231,17 @@
             const formatted = formatScanDate(entry.scannedAtEpochSeconds);
 
             idCell.textContent = entry.ticketId ?? "-";
-            nameCell.textContent = entry.nombre ?? "-";
+            
+            // Make ticket name clickable link to /promociones with slug-based hash
+            const nameLink = document.createElement("a");
+            const eventSlug = (entry.nombre ?? "").toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+            nameLink.href = "/promociones#boleto-" + eventSlug;
+            nameLink.textContent = entry.nombre ?? "-";
+            nameLink.style.cursor = "pointer";
+            nameLink.style.color = "#7fbbff";
+            nameLink.style.textDecoration = "underline";
+            nameCell.appendChild(nameLink);
+            
             dateCell.textContent = formatted.date;
             timeCell.textContent = formatted.time;
 
