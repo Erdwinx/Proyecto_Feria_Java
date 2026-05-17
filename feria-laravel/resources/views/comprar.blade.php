@@ -451,7 +451,22 @@
     function readCart() {
         try {
             const raw = localStorage.getItem(cartKey);
-            return raw ? JSON.parse(raw) : [];
+            const items = raw ? JSON.parse(raw) : [];
+            if (!Array.isArray(items)) {
+                return [];
+            }
+
+            return items.map((item, index) => ({
+                id: item.id ?? `cart-${index}`,
+                name: item.name || 'Boleto',
+                category: item.category || 'general',
+                seatNumbers: Array.isArray(item.seatNumbers) ? item.seatNumbers : [],
+                dateEvento: item.dateEvento || '',
+                eventName: item.eventName || '',
+                price: Number.isFinite(Number(item.price)) ? Number(item.price) : 0,
+                qty: Math.max(1, parseInt(item.qty, 10) || 1),
+                tipoEvento: item.tipoEvento || '',
+            }));
         } catch (error) {
             return [];
         }
@@ -512,24 +527,30 @@
         items.forEach(item => {
             const row = document.createElement("div");
             row.className = "cart-item";
-            row.style.display = "flex";
-            row.style.justifyContent = "space-between";
+            row.style.display = "grid";
+            row.style.gridTemplateColumns = "minmax(0, 1fr) auto auto";
+            row.style.columnGap = "10px";
             row.style.alignItems = "center";
-            row.style.paddingRight = "10px";
+            row.style.padding = "0.7rem 0.5rem";
             
             const infoDiv = document.createElement("div");
             infoDiv.style.flex = "1";
+            infoDiv.style.minWidth = "0";
+            infoDiv.style.display = "flex";
+            infoDiv.style.flexDirection = "column";
+            infoDiv.style.gap = "0.15rem";
             infoDiv.innerHTML = `
                 <div style="margin-bottom: 0.25rem;">
                     <strong>${item.name}</strong>
                 </div>
                 ${item.dateEvento ? `<div style="font-size: 0.85rem; color: var(--muted);">📅 ${item.dateEvento}</div>` : ''}
                 ${item.eventName ? `<div style="font-size: 0.85rem; color: var(--muted);">${item.eventName}</div>` : ''}
-                <span class="cart-qty">x${item.qty}</span>
+                <span class="cart-qty">x${item.qty} · ${item.category}</span>
             `;
             
             const priceDiv = document.createElement("div");
-            priceDiv.style.marginRight = "10px";
+            priceDiv.style.whiteSpace = "nowrap";
+            priceDiv.style.fontWeight = "700";
             priceDiv.textContent = formatMoney(item.price * item.qty);
             
             const removeBtn = document.createElement("button");
@@ -540,7 +561,7 @@
             removeBtn.style.border = "none";
             removeBtn.style.cursor = "pointer";
             removeBtn.style.fontSize = "1.2em";
-            removeBtn.style.padding = "0 5px";
+            removeBtn.style.padding = "0 0 0 5px";
             removeBtn.addEventListener("click", () => removeFromCart(item.id));
             
             row.appendChild(infoDiv);
@@ -600,7 +621,7 @@
     }
 
     function getAllowedCategories(dateValue) {
-        return isConcertDate(dateValue) ? ["grada", "vip"] : ["general", "grada", "vip"];
+        return ["general", "grada", "vip"];
     }
 
     async function loadSeatAvailability(dateValue, category) {
@@ -684,7 +705,7 @@
 
         if (selectedSeatCategory === "general") {
             seatSelectionInfo.textContent = "Categoria activa: General (sin asiento asignado)";
-            seatActionsContainer.classList.add("hidden");
+            seatActionsContainer.classList.remove("hidden");
             addSeatsToCart.disabled = false;
         } else if (selectedSeats.length > 0) {
             seatSelectionInfo.textContent = `Categoria activa: ${selectedSeatCategory.toUpperCase()} - ${selectedSeats.length} asiento${selectedSeats.length > 1 ? 's' : ''} seleccionado${selectedSeats.length > 1 ? 's' : ''}: ${selectedSeats.join(", ")}`;
@@ -1007,7 +1028,7 @@
         const isConcert = isConcertDate(selectedDate);
 
         dateSelectionInfo.textContent = selectedDate
-            ? (isConcert ? "Fecha de concierto seleccionada. Puedes elegir Grada o VIP." : "Fecha de feria seleccionada. Puedes elegir General, Grada o VIP.")
+            ? (isConcert ? "Fecha de concierto seleccionada. Puedes elegir General, Grada o VIP." : "Fecha de feria seleccionada. Puedes elegir General, Grada o VIP.")
             : "Elige una fecha para ver las categorías y asientos disponibles.";
 
         if (!selectedDate) {
@@ -1027,9 +1048,10 @@
 
         if (isConcert) {
             seatOptions.querySelectorAll(".seat-choice").forEach(btn => {
-                btn.disabled = !['grada', 'vip'].includes(btn.dataset.seatCategory);
+                btn.disabled = false;
+                btn.classList.remove("hidden");
             });
-            setCategoryAndReload(selectedSeatCategory === 'grada' || selectedSeatCategory === 'vip' ? selectedSeatCategory : 'grada');
+            setCategoryAndReload(['general', 'grada', 'vip'].includes(selectedSeatCategory) ? selectedSeatCategory : 'general');
         } else {
             seatOptions.querySelectorAll(".seat-choice").forEach(btn => {
                 btn.disabled = false;
